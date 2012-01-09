@@ -30,7 +30,9 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   def renderTemplate(name: String, args: Map[String, AnyRef], request: Request[_]): String = {
 
     try {
+      Logger("play").info("Loading template " + name)
       val template = GenericTemplateLoader.load(name)
+      Logger("play").info("Starting to render")
       val templateArgs = args
       template.render(templateArgs)
 

@@ -5,10 +5,10 @@ import i18n.Messages
 import play.libs._
 import java.lang.{Throwable, Integer, String, Class}
 import play.api.Play.current
-import java.io.File
-import java.util.ArrayList
 import scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
+import java.util.ArrayList
+import java.io._
 
 /**
  *
@@ -36,7 +36,7 @@ class Play2TemplateUtils extends TemplateUtils {
   }
 
   def logTraceIfEnabled(p1: String, p2: Object*) {
-    if(log.isTraceEnabled) {
+    if (log.isTraceEnabled) {
       log.trace(p1.format(p2))
     }
   }
@@ -56,24 +56,36 @@ class Play2TemplateUtils extends TemplateUtils {
   def findFileWithPath(path: String) = {
     // TODO add more roots
     val f = new File(current.path, path)
-    if(f.exists()) Play2VirtualFile.fromFile(f) else null
+    if (f.exists()) Play2VirtualFile.fromFile(f) else null
   }
 
   def list(parent: PlayVirtualFile) = {
     val r = new ArrayList[PlayVirtualFile]
-    if(parent.exists()) {
+    if (parent.exists()) {
       r.addAll(parent.asInstanceOf[Play2VirtualFile].list())
     }
     r
   }
 
-  def encodeBASE64(p1: Array[Byte]) = ""
+  def encodeBASE64(p1: Array[Byte]) = new sun.misc.BASE64Encoder().encode(p1)
 
-  def decodeBASE64(p1: String) = null
+  def decodeBASE64(p1: String) = new sun.misc.BASE64Decoder().decodeBuffer(p1)
 
-  def serialize(p1: AnyRef) = null
+  def serialize(o: AnyRef): Array[Byte] = {
+    val baos: ByteArrayOutputStream = new ByteArrayOutputStream
+    val oo: ObjectOutputStream = new ObjectOutputStream(baos)
+    oo.writeObject(o)
+    oo.flush()
+    oo.close()
+    baos.toByteArray
+  }
 
-  def deserialize(p1: Array[Byte]) = null
+  def deserialize(b: Array[Byte]): AnyRef = {
+    val bais: ByteArrayInputStream = new ByteArrayInputStream(b)
+    val oi: ObjectInputStream = new ObjectInputStream(bais)
+    oi.readObject
+  }
+
 
   // TODO
   def getLang = "en"
@@ -100,9 +112,22 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getClassLoader = current.classloader
 
-  def getAssignableClasses(p1: Class[_]) = null
+  def getAssignableClasses(clazz: Class[_]) = {
+    import org.reflections._
+    val assignableClasses = new Reflections(new util.ConfigurationBuilder().addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))).getSubTypesOf(clazz)
+    val list = new ArrayList[Class[_]]()
+    list.addAll(assignableClasses)
+    list
+  }
 
-  def getAllClasses = null
+  def getAllClasses = {
+    import org.reflections._
+    val assignableClasses = new Reflections(new util.ConfigurationBuilder().addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))).getSubTypesOf(classOf[Object])
+    val list = new ArrayList[Class[_]]()
+    list.addAll(assignableClasses)
+    list
+
+  }
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
 }

@@ -21,7 +21,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
         throwException(e)
       case PLAY =>
         throwException(cleanStackTrace(e))
-
+      case _ => throwException(e)
     }
   }
 

@@ -47,9 +47,9 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def getAuthenticityToken = "" // TODO may have to move someplace else
 
-  def handleActionInvocation(p1: String, p2: String, p3: AnyRef, p4: Boolean, p5: ExecutableTemplate) = null
+  def handleActionInvocation(p1: String, p2: String, p3: AnyRef, p4: Boolean, p5: ExecutableTemplate) = throw new RuntimeException("not implemented")
 
-  def reverseWithCheck(p1: String, p2: Boolean) = ""
+  def reverseWithCheck(p1: String, p2: Boolean) = throw new RuntimeException("not implemented")
 
   def addTemplateExtensions() = new java.util.ArrayList[String]()
 
