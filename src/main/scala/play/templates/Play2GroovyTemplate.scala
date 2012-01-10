@@ -15,6 +15,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
   }
 
   def handleException(e: TemplateEngineException) {
+    e.printStackTrace()
     e.getExceptionType match {
       case NO_ROUTE_FOUND =>
         // shouldn't happen

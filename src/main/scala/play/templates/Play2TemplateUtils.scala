@@ -9,6 +9,7 @@ import scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
 import java.util.ArrayList
 import java.io._
+import org.reflections.scanners.SubTypesScanner
 
 /**
  *
@@ -20,15 +21,15 @@ class Play2TemplateUtils extends TemplateUtils {
   lazy val log = Logger("play")
 
   def logWarn(p1: String, p2: Object*) {
-    log.warn(p1.format(p2))
+    log.warn(p1.format(p2 : _ *))
   }
 
   def logWarn(p1: Throwable, p2: String, p3: Object*) {
-    log.warn(p2.format(p3), p1)
+    log.warn(p2.format(p3 : _ *), p1)
   }
 
   def logError(p1: String, p2: Object*) {
-    log.error(p1.format(p2))
+    log.error(p1.format(p2 : _ *))
   }
 
   def logError(p1: Throwable, p2: String) {
@@ -37,7 +38,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def logTraceIfEnabled(p1: String, p2: Object*) {
     if (log.isTraceEnabled) {
-      log.trace(p1.format(p2))
+      log.trace(p1.format(p2 : _ *))
     }
   }
 
@@ -114,7 +115,10 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getAssignableClasses(clazz: Class[_]) = {
     import org.reflections._
-    val assignableClasses = new Reflections(new util.ConfigurationBuilder().addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))).getSubTypesOf(clazz)
+    val assignableClasses = new Reflections(new util.ConfigurationBuilder()
+      .addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))
+      .setScanners(new scanners.SubTypesScanner)
+    ).getSubTypesOf(clazz)
     val list = new ArrayList[Class[_]]()
     list.addAll(assignableClasses)
     list
@@ -122,7 +126,10 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getAllClasses = {
     import org.reflections._
-    val assignableClasses = new Reflections(new util.ConfigurationBuilder().addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))).getSubTypesOf(classOf[Object])
+    val assignableClasses = new Reflections(new util.ConfigurationBuilder()
+      .addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))
+      .setScanners(new scanners.SubTypesScanner)
+    ).getSubTypesOf(classOf[Object])
     val list = new ArrayList[Class[_]]()
     list.addAll(assignableClasses)
     list

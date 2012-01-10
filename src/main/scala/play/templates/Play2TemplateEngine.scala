@@ -9,6 +9,7 @@ import java.io.File
 import scala.collection.JavaConverters.bufferAsJavaListConverter
 import collection.mutable.Buffer
 import play.api.Play.current
+import play.templates.TemplateEngineException.ExceptionType
 
 /**
  *
@@ -25,6 +26,7 @@ class Play2TemplateEngine extends TemplateEngine {
   def initUtilsImplementation() = new Play2TemplateUtils()
 
   def handleException(t: Throwable) {
+    t.printStackTrace()
     t match {
       case notFound if t.isInstanceOf[TemplateNotFoundException] => PlayException("Template not found", "The template could not be found", Some(t))
       case t@_ => throw t
@@ -77,7 +79,7 @@ class Play2TemplateEngine extends TemplateEngine {
 }
 
 case class Play2VirtualFile(name: String, relativePath: String, lastModified: java.lang.Long, exists: Boolean, isDirectory: Boolean, realFile: Option[File] = None) extends PlayVirtualFile {
-  def contentAsString = null
+  def contentAsString = if(realFile.isDefined) scala.io.Source.fromFile(realFile.get).getLines().mkString("\n") else throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Trying to read template from non-existing file", null)
   def getName = name
   def list() = {
     if(exists) realFile.get.listFiles().map(Play2VirtualFile.fromFile(_)).toList else List()

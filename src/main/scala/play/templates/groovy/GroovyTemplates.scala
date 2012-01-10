@@ -8,6 +8,8 @@ import play.templates.TemplateEngineException.ExceptionType
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
+ *
+ * @author Manuel Bernhardt <bernhardt.manuel@gmail.com>
  */
 
 trait GroovyTemplates {

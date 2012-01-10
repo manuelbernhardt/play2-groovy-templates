@@ -27,7 +27,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     Logger("play").info("Stopping Groovy template engine")
   }
   
-  def renderTemplate(name: String, args: Map[String, AnyRef], request: Request[_]): String = {
+  def renderTemplate(name: String, args: Map[String, AnyRef]): String = {
 
     try {
       Logger("play").info("Loading template " + name)

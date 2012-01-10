@@ -3,7 +3,7 @@ package play.templates.groovy
 import play.api.libs.MimeTypes
 import play.api.Play.current
 import play.templates.GroovyTemplatesPlugin
-import play.api.mvc.{Action, Request, Content}
+import play.api.mvc.{Request, Content}
 
 /**
  * 
@@ -14,7 +14,17 @@ case class GroovyTemplateContent(name: Option[String], args: Seq[(Symbol, AnyRef
 
   def body = {
     val n = if (name.isEmpty) inferTemplateName else name.get
-    current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, args.map(e => (e._1.name, e._2)).toMap, request)).getOrElse(null)
+
+    val callArgs = args.map(e => (e._1.name, e._2)).toMap
+    // TODO equivalent of renderArgs?
+    val binding = Map(
+      "request" -> request,
+      "session" -> request.session,
+      "flash" -> request.flash,
+      "params" -> request.queryString // TODO not sure if we shouldn't call this one "queryString" instead
+    )
+
+    current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, callArgs ++ binding)).getOrElse(null)
   }
 
   def contentType = if(name.isDefined) MimeTypes.forFileName(name.get).getOrElse("text/html") else "text/html"
