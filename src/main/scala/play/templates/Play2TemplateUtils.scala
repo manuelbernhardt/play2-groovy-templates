@@ -7,9 +7,8 @@ import java.lang.{Throwable, Integer, String, Class}
 import play.api.Play.current
 import scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
-import java.util.ArrayList
 import java.io._
-import org.reflections.scanners.SubTypesScanner
+import java.util.ArrayList
 
 /**
  *
@@ -114,6 +113,7 @@ class Play2TemplateUtils extends TemplateUtils {
   def getClassLoader = current.classloader
 
   def getAssignableClasses(clazz: Class[_]) = {
+
     import org.reflections._
     val assignableClasses = new Reflections(new util.ConfigurationBuilder()
       .addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))
@@ -125,15 +125,10 @@ class Play2TemplateUtils extends TemplateUtils {
   }
 
   def getAllClasses = {
-    import org.reflections._
-    val assignableClasses = new Reflections(new util.ConfigurationBuilder()
-      .addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))
-      .setScanners(new scanners.SubTypesScanner)
-    ).getSubTypesOf(classOf[Object])
+    val classes = current.plugin[GroovyTemplatesPlugin].map(_.allClassesMetadata).map(_.getSubTypesOf(classOf[Object]))
     val list = new ArrayList[Class[_]]()
-    list.addAll(assignableClasses)
+    list.addAll(classes.getOrElse(new ArrayList[Class[_]]()))
     list
-
   }
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath

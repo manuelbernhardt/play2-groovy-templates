@@ -1,9 +1,12 @@
 package play.templates
 
 import play.api._
-import play.api.mvc._
+import org.reflections._
 import scala.collection.JavaConversions._
+import org.reflections.Reflections
+
 /**
+ * Plugin for rendering Groovy templates
  *
  * @author Manuel Bernhardt <bernhardt.manuel@gmail.com>
  */
@@ -14,19 +17,27 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   var engine: TemplateEngine = null
 
-  override def onStart {
-    Logger("play").info("Starting Groovy template engine")
+  var allClassesMetadata: Reflections = null
 
+
+  override def onStart {
     engine = new Play2TemplateEngine
     engine.startup()
 
+    // cache lookup off all classes
+    // the template engine needs this to allow static access to classes with "nice" names (without the $'s)
+    allClassesMetadata = new Reflections(new util.ConfigurationBuilder()
+      .addUrls(util.ClasspathHelper.forJavaClassPath())
+      .setScanners(new scanners.SubTypesScanner))
     CustomGroovy()
+
+    Logger("play").info("Groovy template engine started")
   }
 
   override def onStop {
     Logger("play").info("Stopping Groovy template engine")
   }
-  
+
   def renderTemplate(name: String, args: Map[String, AnyRef]): String = {
 
     try {
