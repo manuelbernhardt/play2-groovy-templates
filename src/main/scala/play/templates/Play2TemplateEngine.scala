@@ -1,6 +1,6 @@
 package play.templates
 
-import exceptions.TemplateNotFoundException
+import exceptions.{TemplateCompilationException, TemplateNotFoundException}
 import play.api._
 import cache.Cache
 import play.templates.GroovyTemplate.ExecutableTemplate
@@ -26,9 +26,15 @@ class Play2TemplateEngine extends TemplateEngine {
   def initUtilsImplementation() = new Play2TemplateUtils()
 
   def handleException(t: Throwable) {
+    // TODO more handling
+    // TODO see after https://play.lighthouseapp.com/projects/82401-play-20/tickets/93-improper-exception-handling-for-exceptions-occuring-in-a-content-implementation is fixed
     t.printStackTrace()
     t match {
       case notFound if t.isInstanceOf[TemplateNotFoundException] => PlayException("Template not found", "The template could not be found", Some(t))
+      case compilation if t.isInstanceOf[TemplateCompilationException] => {
+        val e = t.asInstanceOf[TemplateCompilationException]
+        throw PlayException("Template Compilation Exception", e.getMessage, Some(TemplateCompilationError(new File(current.path, e.getSourceFile), e.getMessage, e.getLineNumber, -1)))
+      }
       case t@_ => throw t
     }
   }
@@ -49,9 +55,9 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def getAuthenticityToken = "" // TODO may have to move someplace else
 
-  def handleActionInvocation(p1: String, p2: String, p3: AnyRef, p4: Boolean, p5: ExecutableTemplate) = throw new RuntimeException("not implemented")
+  def handleActionInvocation(controller: String, name: String, param: AnyRef, absolute: Boolean, template: ExecutableTemplate) = throw new RuntimeException("not implemented")
 
-  def reverseWithCheck(p1: String, p2: Boolean) = throw new RuntimeException("not implemented")
+  def reverseWithCheck(action: String, absolute: Boolean) = throw new RuntimeException("not implemented")
 
   def addTemplateExtensions() = new java.util.ArrayList[String]()
 

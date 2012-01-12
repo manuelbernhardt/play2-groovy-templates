@@ -1,8 +1,9 @@
 package play.templates
 
-import play.exceptions._
 import java.lang.Throwable
 import TemplateEngineException.ExceptionType._
+import play.api.PlayException
+
 /**
  *
  * @author Manuel Bernhardt <bernhardt.manuel@gmail.com>
@@ -15,6 +16,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
   }
 
   def handleException(e: TemplateEngineException) {
+    // TODO better handling
     e.printStackTrace()
     e.getExceptionType match {
       case NO_ROUTE_FOUND =>
@@ -27,6 +29,6 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
   }
 
   def throwException(e: Throwable) {
-    throw e
+    throw PlayException("Error", e.getMessage, Some(e))
   }
 }
