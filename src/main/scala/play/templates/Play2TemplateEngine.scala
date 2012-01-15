@@ -49,6 +49,9 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def getPrecompiledTemplate(name: String) = new File(precompiledTemplatesLocation)
 
+
+  def getTemplateCompiler = new Play2GroovyTemplateCompiler
+
   def getTemplatePaths = Buffer(Play2VirtualFile.fromPath("app/views")).asJava
 
   def getCurrentResponseEncoding = "utf-8" // TODO may have to move someplace else
