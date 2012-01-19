@@ -15,6 +15,8 @@ import play.templates.TemplateEngineException.ExceptionType
 trait GroovyTemplates {
   self: Controller =>
 
+  implicit def renderArgs: RichRenderArgs = new RichRenderArgs(RenderArgs.current())
+  
   implicit def className = {
     val name = getClass.getName
     if (name.endsWith("$")) name.substring(0, name.length() - 1) else name
@@ -53,4 +55,19 @@ trait GroovyTemplates {
       new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not figure out current method name in execution call", null)
 
   }
+}
+
+private[groovy] class RichRenderArgs(val renderArgs: RenderArgs) {
+
+    def +=(variable: Tuple2[String, Any]) = {
+        renderArgs.put(variable._1, variable._2)
+        this
+    }
+
+    def apply(key: String) = {
+        renderArgs.data.containsKey(key) match {
+            case true => Some(renderArgs.get(key))
+            case false => None
+        }
+    }
 }
