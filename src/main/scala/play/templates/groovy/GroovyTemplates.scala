@@ -1,10 +1,10 @@
 package play.templates.groovy
 
-import play.api.http.ContentTypes
-import play.api.mvc.{ContentTypeOf, Request, Controller}
+import play.api.mvc.{Request, Controller}
 import play.api.mvc.Codec
 import play.templates.TemplateEngineException
 import play.templates.TemplateEngineException.ExceptionType
+import play.api.http.{ContentTypeOf, ContentTypes}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates

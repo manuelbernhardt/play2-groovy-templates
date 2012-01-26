@@ -72,10 +72,10 @@ class Play2TemplateEngine extends TemplateEngine {
     }
   }
 
-  def getCachedTemplate(name: String, source: String): Array[Byte] = Cache.get[Array[Byte]](name).getOrElse(null)
+  def getCachedTemplate(name: String, source: String): Array[Byte] = Cache.get(name).getOrElse(return null).asInstanceOf[Array[Byte]]
 
   def cacheBytecode(byteCode: Array[Byte], name: String, source: String) {
-    Cache.set(name, source)
+    Cache.set(name, source, 0)
   }
 
   def deleteBytecode(p1: String) { }
