@@ -69,9 +69,9 @@ trait GroovyTemplates {
     val callArgs = args.map(e => (e._1.name, e._2)).toMap
     val binding: Map[String, AnyRef] = RenderArgs.current().data.asScala.toMap ++ Map(
       "request" -> request, // TODO pass in the args of the session rather than the object, once it will be implemented in Play
-      "session" -> request.session.data,
-      "flash" -> request.flash.data,
-      "params" -> request.queryString, // TODO not sure if we shouldn't call this one "queryString" instead
+      "session" -> request.session.data.asJava,
+      "flash" -> request.flash.data.asJava,
+      "params" -> request.queryString.asJava, // TODO not sure if we shouldn't call this one "queryString" instead
       "messages" -> new WrappedMessages
     )
 
