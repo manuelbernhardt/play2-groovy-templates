@@ -1,7 +1,8 @@
 package play.templates
 
+import groovy.WrappedMessages
 import play.api._
-import i18n.Messages
+import i18n.{Lang, Messages}
 import play.libs._
 import java.lang.{Throwable, Integer, String, Class}
 import play.api.Play.current
@@ -9,11 +10,6 @@ import scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
 import java.io._
 import java.util.ArrayList
-
-/**
- *
- * @author Manuel Bernhardt <bernhardt.manuel@gmail.com>
- */
 
 class Play2TemplateUtils extends TemplateUtils {
 
@@ -88,7 +84,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
 
   // TODO
-  def getLang = "en"
+  def getLang = Lang.defaultLang.language
 
   def getMessage(key: Any, args: Object*) = Messages(key.toString, args)
 
@@ -100,7 +96,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def parseDuration(duration: String) = Time.parseDuration(duration)
 
-  def getMessages = Messages
+  def getMessages = new WrappedMessages
 
   def getPlay = Play
 
@@ -112,24 +108,9 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getClassLoader = current.classloader
 
-  def getAssignableClasses(clazz: Class[_]) = {
+  def getAssignableClasses(clazz: Class[_]) = current.plugin[GroovyTemplatesPlugin].map(_.getAssignableClasses(clazz)).getOrElse(new ArrayList[Class[_]])
 
-    import org.reflections._
-    val assignableClasses = new Reflections(new util.ConfigurationBuilder()
-      .addUrls(util.ClasspathHelper.forPackage("controllers", current.classloader))
-      .setScanners(new scanners.SubTypesScanner)
-    ).getSubTypesOf(clazz)
-    val list = new ArrayList[Class[_]]()
-    list.addAll(assignableClasses)
-    list
-  }
-
-  def getAllClasses = {
-    val classes = current.plugin[GroovyTemplatesPlugin].map(_.allClassesMetadata).map(_.getSubTypesOf(classOf[Object]))
-    val list = new ArrayList[Class[_]]()
-    list.addAll(classes.getOrElse(new ArrayList[Class[_]]()))
-    list
-  }
+  def getAllClasses = current.plugin[GroovyTemplatesPlugin].map(_.getAllClasses).getOrElse(new ArrayList[Class[_]])
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
 }

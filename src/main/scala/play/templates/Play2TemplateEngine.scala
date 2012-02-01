@@ -26,14 +26,11 @@ class Play2TemplateEngine extends TemplateEngine {
   def initUtilsImplementation() = new Play2TemplateUtils()
 
   def handleException(t: Throwable) {
-    // TODO more handling
-    // TODO see after https://play.lighthouseapp.com/projects/82401-play-20/tickets/93-improper-exception-handling-for-exceptions-occuring-in-a-content-implementation is fixed
-    t.printStackTrace()
     t match {
       case notFound if t.isInstanceOf[TemplateNotFoundException] => PlayException("Template not found", "The template could not be found", Some(t))
       case compilation if t.isInstanceOf[TemplateCompilationException] => {
         val e = t.asInstanceOf[TemplateCompilationException]
-        throw PlayException("Template Compilation Exception", e.getMessage, Some(TemplateCompilationError(new File(current.path, e.getSourceFile), e.getMessage, e.getLineNumber, -1)))
+        throw TemplateCompilationError(new File(current.path, e.getSourceFile), e.getMessage, e.getLineNumber, -1)
       }
       case t@_ => throw t
     }
@@ -78,7 +75,7 @@ class Play2TemplateEngine extends TemplateEngine {
     Cache.set(name, source, 0)
   }
 
-  def deleteBytecode(p1: String) { }
+  def deleteBytecode(p1: String) {}
 
   def getFastTags = new java.util.ArrayList[Class[_ <: FastTags]]()
 
@@ -88,17 +85,20 @@ class Play2TemplateEngine extends TemplateEngine {
 }
 
 case class Play2VirtualFile(name: String, relativePath: String, lastModified: java.lang.Long, exists: Boolean, isDirectory: Boolean, realFile: Option[File] = None) extends PlayVirtualFile {
-  def contentAsString = if(realFile.isDefined) scala.io.Source.fromFile(realFile.get).getLines().mkString("\n") else throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Trying to read template from non-existing file", null)
+  def contentAsString = if (realFile.isDefined) scala.io.Source.fromFile(current.getFile(relativePath)).getLines().mkString("\n") else throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Trying to read template from non-existing file", null)
+
   def getName = name
+
   def list() = {
-    if(exists) realFile.get.listFiles().map(Play2VirtualFile.fromFile(_)).toList else List()
+    if (exists) realFile.get.listFiles().map(Play2VirtualFile.fromFile(_)).toList else List()
   }
 }
 
 object Play2VirtualFile {
   def fromFile(f: File)(implicit app: Application) = Play2VirtualFile(f.getName, f.getAbsolutePath.substring(app.path.getAbsolutePath.length()), f.lastModified(), f.exists(), f.isDirectory, Some(f))
+
   def fromPath(p: String)(implicit app: Application) = {
-    val f = new File(app.path, p)
-    Play2VirtualFile(f.getName, f.getAbsolutePath.substring(app.path.getAbsolutePath.length()), f.lastModified(), f.exists(), f.isDirectory, Some(f))
+    val f = app.getFile(p)
+    Play2VirtualFile(p.split(File.separator).reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
   }
 }

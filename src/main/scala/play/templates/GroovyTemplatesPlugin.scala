@@ -2,8 +2,9 @@ package play.templates
 
 import play.api._
 import org.reflections._
-import scala.collection.JavaConversions._
-import org.reflections.Reflections
+import scala.collection.JavaConverters._
+import collection.mutable.HashMap
+import java.util.ArrayList
 
 /**
  * Plugin for rendering Groovy templates
@@ -19,16 +20,23 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   var allClassesMetadata: Reflections = null
 
+  var assignableClassesCache = new HashMap[Class[_], ArrayList[Class[_]]]
+
+  var allClassesCache = null
+
 
   override def onStart {
     engine = new Play2TemplateEngine
     engine.startup()
 
-    // cache lookup off all classes
+    // cache lookup of classes
     // the template engine needs this to allow static access to classes with "nice" names (without the $'s)
     allClassesMetadata = new Reflections(new util.ConfigurationBuilder()
       .addUrls(util.ClasspathHelper.forJavaClassPath())
-      .setScanners(new scanners.SubTypesScanner))
+      .setScanners(new AllTypesScanner, new scanners.SubTypesScanner))
+
+    Logger("play").debug("Found %s classes".format(allClassesMetadata.getStore.getKeysCount))
+
     CustomGroovy()
 
     Logger("play").info("Groovy template engine started")
@@ -38,6 +46,33 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     Logger("play").info("Stopping Groovy template engine")
   }
 
+  def getAssignableClasses(clazz: Class[_]) = {
+    if (assignableClassesCache.contains(clazz)) {
+      assignableClassesCache(clazz)
+    } else {
+      val assignableClasses = allClassesMetadata.getSubTypesOf(clazz)
+      val list = new ArrayList[Class[_]]()
+      list.addAll(assignableClasses)
+      assignableClassesCache.put(clazz, list)
+      list
+    }
+  }
+
+  def getAllClasses = {
+    val classes = allClassesMetadata.getStore.get(classOf[AllTypesScanner]).keySet()
+    val list = new ArrayList[Class[_]]()
+    for (c <- classes.asScala) {
+      try {
+        list.add(app.classloader.loadClass(c))
+      } catch {
+        case t => // we don't care
+      }
+
+    }
+    list
+
+  }
+
   def renderTemplate(name: String, args: Map[String, AnyRef]): String = {
 
     try {
@@ -45,7 +80,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
       val template = GenericTemplateLoader.load(name)
       Logger("play").info("Starting to render")
       val templateArgs = args
-      template.render(templateArgs)
+      template.render(templateArgs.asJava)
 
     } catch {
       case t: Throwable =>

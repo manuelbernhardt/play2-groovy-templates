@@ -1,7 +1,7 @@
 package play.templates
 
 /**
- * Groovy tweakes, taken from the play-scala plugin
+ * Groovy tweaks, taken from the play-scala plugin
  */
 object CustomGroovy {
 
