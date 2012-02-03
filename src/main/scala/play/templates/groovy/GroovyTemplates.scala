@@ -93,7 +93,10 @@ trait GroovyTemplates {
       "messages" -> new WrappedMessages
     )
 
-    val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, binding ++ callArgs)).getOrElse(null)
+    val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, binding ++ callArgs)).getOrElse(Right("")).fold(
+      left => "",
+      right => right
+    )
 
     GroovyTemplateContent(body, MimeTypes.forFileName(n).getOrElse("text/html"))
   }

@@ -5,6 +5,7 @@ import org.reflections._
 import scala.collection.JavaConverters._
 import collection.mutable.HashMap
 import java.util.ArrayList
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Plugin for rendering Groovy templates
@@ -73,21 +74,21 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   }
 
-  def renderTemplate(name: String, args: Map[String, AnyRef]): String = {
+  def renderTemplate(name: String, args: Map[String, AnyRef]) = {
 
     try {
       val n = System.currentTimeMillis()
       Logger("play").debug("Loading template " + name)
       val template = GenericTemplateLoader.load(name)
       Logger("play").debug("Starting to render")
-      val templateArgs = args
-      val res = template.render(templateArgs.asJava)
+      val templateArgs = new ConcurrentHashMap[String, AnyRef](args.asJava)
+      val res = template.render(templateArgs)
       Logger("play").info("Rendered template %s in %s".format(name, System.currentTimeMillis() - n))
-      res
+      Right(res)
     } catch {
       case t: Throwable =>
         engine.handleException(t)
-        null
+        Left(t)
     }
 
   }
