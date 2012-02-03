@@ -3,11 +3,12 @@ package play.templates.groovy
 import play.templates.TemplateEngineException.ExceptionType
 import play.api.http.{ContentTypeOf, ContentTypes}
 import play.api.Play.current
-import play.templates.{GroovyTemplatesPlugin, TemplateEngineException}
 import play.api.libs.MimeTypes
 import scala.collection.JavaConverters._
 import play.api.mvc._
 import play.api.i18n.Messages
+import play.api.Play
+import play.templates.{TemplateEngine, GroovyTemplatesPlugin, TemplateEngineException}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
@@ -61,10 +62,27 @@ trait GroovyTemplates {
 
   private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, AnyRef)])(implicit request: Request[_], className: String, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
 
+    def inferTemplateName = {
+      val prefix = (if (className.startsWith("controllers")) className.substring("controllers.".length) else className).replaceAll("\\.", "/") + "/" + currentMethod.get()
+      val html = prefix + ".html"
+      val txt = prefix + ".txt"
 
-    def inferTemplateName = (if (className.startsWith("controllers")) className.substring("controllers.".length) else className).replaceAll("\\.", "/") + "/" + currentMethod.get() + ".html" // TODO more types
+      if(TemplateEngine.utils.findTemplateWithPath(html).exists()) {
+        html
+      } else if(TemplateEngine.utils.findTemplateWithPath(txt).exists()) {
+        txt
+      } else {
+        throw new TemplateNotFoundException("Template %s not found".format(html))
+      }
+    }
 
-    val n = if (name.isEmpty) inferTemplateName else name.get
+    val n: String = if(name.isEmpty) {
+      inferTemplateName
+    } else if(TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
+      name.get
+    } else {
+      throw new TemplateNotFoundException("Template %s not found".format(name))
+    }
 
     val callArgs = args.map(e => (e._1.name, e._2)).toMap
     val binding: Map[String, AnyRef] = RenderArgs.current().data.asScala.toMap ++ Map(
@@ -77,14 +95,16 @@ trait GroovyTemplates {
 
     val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, binding ++ callArgs)).getOrElse(null)
 
-    GroovyTemplateContent(body, if (name.isDefined) MimeTypes.forFileName(name.get).getOrElse("text/html") else "text/html")
+    GroovyTemplateContent(body, MimeTypes.forFileName(n).getOrElse("text/html"))
   }
 }
 
 class WrappedMessages {
 
   def get(key: String) = Messages(key)
-  def get(key: String, args: String*) = Messages(key, args)
+  def get(key: String, arg1: String) = Messages(key, arg1)
+  def get(key: String, arg1: String, arg2: String) = Messages(key, arg1, arg2)
+  def get(key: String, arg1: String, arg2: String, arg3: String) = Messages(key, arg1, arg2, arg3)
 
 }
 

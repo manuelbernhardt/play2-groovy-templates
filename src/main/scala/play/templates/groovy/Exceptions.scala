@@ -17,3 +17,5 @@ class TemplateExecutionException(description: String, l: Option[Int], p: Option[
   def input = if(i.isDefined) i else file.map(scalax.file.Path(_))
   def sourceName = n
 }
+
+class TemplateNotFoundException(description: String) extends PlayException("Template not found", description: String)

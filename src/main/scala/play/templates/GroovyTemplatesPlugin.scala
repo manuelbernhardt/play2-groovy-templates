@@ -28,7 +28,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   override def onStart {
     engine = new Play2TemplateEngine
     engine.startup()
-
+    
     // cache lookup of classes
     // the template engine needs this to allow static access to classes with "nice" names (without the $'s)
     allClassesMetadata = new Reflections(new util.ConfigurationBuilder()
@@ -76,12 +76,14 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   def renderTemplate(name: String, args: Map[String, AnyRef]): String = {
 
     try {
-      Logger("play").info("Loading template " + name)
+      val n = System.currentTimeMillis()
+      Logger("play").debug("Loading template " + name)
       val template = GenericTemplateLoader.load(name)
-      Logger("play").info("Starting to render")
+      Logger("play").debug("Starting to render")
       val templateArgs = args
-      template.render(templateArgs.asJava)
-
+      val res = template.render(templateArgs.asJava)
+      Logger("play").info("Rendered template %s in %s".format(name, System.currentTimeMillis() - n))
+      res
     } catch {
       case t: Throwable =>
         engine.handleException(t)
