@@ -37,12 +37,12 @@ trait GroovyTemplates {
     renderGroovyTemplate(None, Seq())
   }
 
-  def Template(args: (Symbol, AnyRef)*)(implicit request: Request[_]) = {
+  def Template(args: (Symbol, Any)*)(implicit request: Request[_]) = {
     setCurrentMethod()
     renderGroovyTemplate(None, args)
   }
 
-  def Template(name: String, args: (Symbol, AnyRef)*)(implicit request: Request[_]) = {
+  def Template(name: String, args: (Symbol, Any)*)(implicit request: Request[_]) = {
     setCurrentMethod()
     renderGroovyTemplate(Some(name), args)
   }
@@ -60,7 +60,7 @@ trait GroovyTemplates {
 
   }
 
-  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, AnyRef)])(implicit request: Request[_], className: String, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
+  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], className: String, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
 
     def inferTemplateName = {
       val prefix = (if (className.startsWith("controllers")) className.substring("controllers.".length) else className).replaceAll("\\.", "/") + "/" + currentMethod.get()
@@ -119,6 +119,8 @@ private[groovy] class RichRenderArgs(val renderArgs: RenderArgs) {
     renderArgs.put(variable._1, variable._2)
     this
   }
+  
+  def get(key: String, clazz: Class[_]) = renderArgs.get(key, clazz)
 
   def apply(key: String) = {
     renderArgs.data.containsKey(key) match {

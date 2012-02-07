@@ -74,14 +74,14 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   }
 
-  def renderTemplate(name: String, args: Map[String, AnyRef]) = {
+  def renderTemplate(name: String, args: Map[String, Any]) = {
 
     try {
       val n = System.currentTimeMillis()
       Logger("play").debug("Loading template " + name)
       val template = GenericTemplateLoader.load(name)
       Logger("play").debug("Starting to render")
-      val templateArgs = new ConcurrentHashMap[String, AnyRef](args.asJava)
+      val templateArgs = new ConcurrentHashMap[String, AnyRef](args.map(e => (e._1, e._2.asInstanceOf[AnyRef])).asJava)
       val res = template.render(templateArgs)
       Logger("play").info("Rendered template %s in %s".format(name, System.currentTimeMillis() - n))
       Right(res)
