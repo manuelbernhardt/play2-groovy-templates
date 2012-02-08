@@ -21,7 +21,7 @@ trait GroovyTemplates {
 
   implicit def renderArgs: RichRenderArgs = new RichRenderArgs(RenderArgs.current())
 
-  implicit def className = {
+  private def className = {
     val name = getClass.getName
     if (name.endsWith("$")) name.substring(0, name.length() - 1) else name
   }
@@ -60,7 +60,7 @@ trait GroovyTemplates {
 
   }
 
-  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], className: String, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
+  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
 
     def inferTemplateName = {
       val prefix = (if (className.startsWith("controllers")) className.substring("controllers.".length) else className).replaceAll("\\.", "/") + "/" + currentMethod.get()
