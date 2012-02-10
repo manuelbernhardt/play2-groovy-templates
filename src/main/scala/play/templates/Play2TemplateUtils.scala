@@ -13,6 +13,12 @@ import java.util.ArrayList
 
 class Play2TemplateUtils extends TemplateUtils {
 
+  lazy val rootTemplatePaths = {
+    val modules = Play2VirtualFile.fromPath("/modules")
+    val moduleRoots: List[String] = if(modules.isDirectory) modules.realFile.get.listFiles().filter(_.isDirectory).map(_.getName + "/app/views/").toList else List.empty
+    Seq("/app/views/") ++ moduleRoots
+  }
+
   lazy val log = Logger("play")
 
   def logWarn(p1: String, p2: Object*) {
@@ -39,17 +45,21 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def isDevMode = Play.isDev
 
-  def usePrecompiled() = false
+  def usePrecompiled() = Play.isProd
 
   // TODO
   def getDefaultWebEncoding = "utf-8"
 
-  def findTemplateWithPath(path: String) = {
-    // TODO add more roots
+ 
+  def findTemplateWithPath(path: String): Play2VirtualFile = {
+    for (p <- rootTemplatePaths) {
+      val t = Play2VirtualFile.fromPath(p + path)
+      if(t.exists) return t
+    }
     Play2VirtualFile.fromPath("/app/views/" + path)
   }
 
-  def findFileWithPath(path: String) = {
+  def findFileWithPath(path: String): Play2VirtualFile = {
     // TODO add more roots
     val f = new File(current.path, path)
     if (f.exists()) Play2VirtualFile.fromFile(f) else null

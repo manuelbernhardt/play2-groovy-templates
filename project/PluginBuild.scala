@@ -9,7 +9,8 @@ object PluginBuild extends Build {
     "org.codehaus.groovy" % "groovy" % "1.8.5",
     "com.jamonapi" % "jamon" % "2.7", 
     "commons-collections" % "commons-collections" % "3.2.1",
-    "commons-lang" % "commons-lang" % "2.6"
+    "commons-lang" % "commons-lang" % "2.6",
+    "commons-io" % "commons-io" % "2.0"
   )
 
   val main = Project(

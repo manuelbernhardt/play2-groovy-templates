@@ -20,7 +20,9 @@ class Play2TemplateEngine extends TemplateEngine {
 
   override def startup() {
     super.startup()
-    new File(precompiledTemplatesLocation).mkdir()
+    val precompiled = new File(precompiledTemplatesLocation)
+    org.apache.commons.io.FileUtils.deleteDirectory(precompiled)
+    precompiled.mkdir()
   }
 
   def initUtilsImplementation() = new Play2TemplateUtils()
@@ -31,6 +33,12 @@ class Play2TemplateEngine extends TemplateEngine {
       case compilation if t.isInstanceOf[TemplateCompilationException] => {
         val e = t.asInstanceOf[TemplateCompilationException]
         throw TemplateCompilationError(new File(current.path, e.getSourceFile), e.getMessage, e.getLineNumber, -1)
+      }
+      case compilation if t.isInstanceOf[play.templates.TemplateCompilationError] => {
+        val e = t.asInstanceOf[play.templates.TemplateCompilationError]
+        if(TemplateEngine.utils.usePrecompiled()) {
+          Logger("play").error("Could not compile template %s at line %s: %s".format(e.source.getName, e.line, e.getMessage))
+        }
       }
       case t@_ => throw t
     }
@@ -44,7 +52,7 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def loadPrecompiledTemplate(name: String) = scala.io.Source.fromFile(precompiledTemplatesLocation + name).map(_.toByte).toArray
 
-  def getPrecompiledTemplate(name: String) = new File(precompiledTemplatesLocation)
+  def getPrecompiledTemplate(name: String) = new File(precompiledTemplatesLocation + name)
 
 
   def getTemplateCompiler = new Play2GroovyTemplateCompiler
@@ -85,7 +93,18 @@ class Play2TemplateEngine extends TemplateEngine {
 }
 
 case class Play2VirtualFile(name: String, relativePath: String, lastModified: java.lang.Long, exists: Boolean, isDirectory: Boolean, realFile: Option[File] = None) extends PlayVirtualFile {
-  def contentAsString = if (realFile.isDefined) scala.io.Source.fromFile(current.getFile(relativePath)).getLines().mkString("\n") else throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Trying to read template from non-existing file", null)
+  def contentAsString = if (realFile.isDefined) {
+    try {
+      scala.io.Source.fromFile(current.getFile(relativePath)).getLines().mkString("\n")
+    } catch {
+      case t =>
+        TemplateEngine.utils.logError("Could not read content from file " + relativePath)
+        TemplateEngine.engine.handleException(t)
+        null
+    }
+  } else {
+    throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Trying to read template from non-existing file", null)
+  }
 
   def getName = name
 
