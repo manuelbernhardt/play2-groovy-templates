@@ -98,9 +98,9 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getMessage(key: Any, args: Object*) = Messages(key.toString, args)
 
-  def getDateFormat = ""
+  def getDateFormat = throw new RuntimeException("Not implemented")
 
-  def getCurrencySymbol(p1: String) = ""
+  def getCurrencySymbol(p1: String) = throw new RuntimeException("Not implemented")
 
   def htmlEscape(text: String) = org.apache.commons.lang.StringEscapeUtils.escapeHtml(text)
 
