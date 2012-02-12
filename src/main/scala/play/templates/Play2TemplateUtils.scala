@@ -96,7 +96,7 @@ class Play2TemplateUtils extends TemplateUtils {
   // TODO
   def getLang = Lang.defaultLang.language
 
-  def getMessage(key: Any, args: Object*) = Messages(key.toString, args)
+  def getMessage(key: Any, args: Object*) = Messages(key.toString, args : _ *)
 
   def getDateFormat = throw new RuntimeException("Not implemented")
 
