@@ -1,13 +1,14 @@
 package play.templates
 
 import java.io.File
+import play.api.Play.current
 
 class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
 
   override def action(absolute: Boolean) {
 
     def invalidRouteDefinition(action: String) {
-      throw new TemplateCompilationError(new File(template.name), "Invalid routes definition: '%s'".format(action), parser.getLine, template.source.split("\n")(parser.getLine).indexOf(parser.getToken))
+      throw new TemplateCompilationError(new File(current.path, template.name), "Invalid routes definition: %s".format(action), parser.getLine, template.source.split("\n")(parser.getLine).indexOf(parser.getToken))
     }
 
     val actionPattern = """^(.*)?routes(.*)$""".r

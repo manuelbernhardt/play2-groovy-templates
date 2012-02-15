@@ -30,15 +30,12 @@ class Play2TemplateEngine extends TemplateEngine {
   def handleException(t: Throwable) {
     t match {
       case notFound if t.isInstanceOf[TemplateNotFoundException] => PlayException("Template not found", "The template could not be found", Some(t))
-      case compilation if t.isInstanceOf[TemplateCompilationException] => {
-        val e = t.asInstanceOf[TemplateCompilationException]
-        throw TemplateCompilationError(new File(current.path, e.getSourceFile), e.getMessage, e.getLineNumber, -1)
-      }
       case compilation if t.isInstanceOf[play.templates.TemplateCompilationError] => {
         val e = t.asInstanceOf[play.templates.TemplateCompilationError]
         if(TemplateEngine.utils.usePrecompiled()) {
           Logger("play").error("Could not compile template %s at line %s: %s".format(e.source.getName, e.line, e.getMessage))
         }
+        throw new play.templates.groovy.TemplateCompilationException(e.getMessage, Some(e.line), None, Some(e.source), Some(e.source.getName), None)
       }
       case t@_ => throw t
     }
