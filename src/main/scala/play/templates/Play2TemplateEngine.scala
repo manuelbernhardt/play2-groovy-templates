@@ -77,7 +77,7 @@ class Play2TemplateEngine extends TemplateEngine {
   def getCachedTemplate(name: String, source: String): Array[Byte] = Cache.get(name).getOrElse(return null).asInstanceOf[Array[Byte]]
 
   def cacheBytecode(byteCode: Array[Byte], name: String, source: String) {
-    Cache.set(name, source, 0)
+    Cache.set(name, byteCode, 0)
   }
 
   def deleteBytecode(p1: String) {}
@@ -117,4 +117,5 @@ object Play2VirtualFile {
     val f = app.getFile(p)
     Play2VirtualFile(p.split(File.separator).reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
   }
+
 }
