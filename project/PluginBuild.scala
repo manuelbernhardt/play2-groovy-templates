@@ -4,7 +4,7 @@ import Keys._
 object PluginBuild extends Build {
 
   val dependencies = Seq(
-    "play" %% "play" % "2.0-RC1-SNAPSHOT",
+    "play" %% "play" % "2.0-RC3-SNAPSHOT",
     "play" %% "groovy-template-engine" % "0.1-SNAPSHOT",
     "org.codehaus.groovy" % "groovy" % "1.8.5",
     "com.jamonapi" % "jamon" % "2.7", 
