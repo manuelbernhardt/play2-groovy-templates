@@ -51,14 +51,9 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def getPrecompiledTemplate(name: String) = new File(precompiledTemplatesLocation + name)
 
-
   def getTemplateCompiler = new Play2GroovyTemplateCompiler
 
   def getTemplatePaths = Buffer(Play2VirtualFile.fromPath("app/views")).asJava
-
-  def getCurrentResponseEncoding = "utf-8" // TODO implement. May have to move someplace else
-
-  def getAuthenticityToken = "" // TODO implement. May have to move someplace else
 
   def handleActionInvocation(controller: String, name: String, param: AnyRef, absolute: Boolean, template: ExecutableTemplate) = throw new RuntimeException("not implemented")
 

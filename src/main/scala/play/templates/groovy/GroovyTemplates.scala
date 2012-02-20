@@ -7,8 +7,7 @@ import play.api.libs.MimeTypes
 import scala.collection.JavaConverters._
 import play.api.mvc._
 import play.api.i18n.Messages
-import play.api.Play
-import play.templates.{TemplateEngine, GroovyTemplatesPlugin, TemplateEngineException}
+import play.templates.{Play2TemplateUtils, TemplateEngine, GroovyTemplatesPlugin, TemplateEngineException}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
@@ -18,6 +17,9 @@ import play.templates.{TemplateEngine, GroovyTemplatesPlugin, TemplateEngineExce
 
 trait GroovyTemplates {
   self: Controller =>
+  
+  // if a language parameter is passed in with the parameters we use this one for language resolution
+  protected val __LANG: String = "__LANG"
 
   implicit def renderArgs: RichRenderArgs = new RichRenderArgs(RenderArgs.current())
 
@@ -30,27 +32,32 @@ trait GroovyTemplates {
     ContentTypeOf[GroovyTemplateContent](Some(ContentTypes.HTML))
   }
 
-  implicit val currentMethod: ThreadLocal[String] = new ThreadLocal[String]()
+  private implicit val currentMethod: ThreadLocal[String] = new ThreadLocal[String]()
 
   def Template(implicit request: Request[_]) = {
-    setCurrentMethod()
+    setContext(request)
     renderGroovyTemplate(None, Seq())
   }
 
   def Template(args: (Symbol, Any)*)(implicit request: Request[_]) = {
-    setCurrentMethod()
+    setContext(request)
     renderGroovyTemplate(None, args)
   }
 
   def Template(name: String, args: (Symbol, Any)*)(implicit request: Request[_]) = {
-    setCurrentMethod()
+    setContext(request)
     renderGroovyTemplate(Some(name), args)
   }
 
   private val methodNameExtractor = """\$anonfun\$([^\$]*)(.*)""".r
 
-  private def setCurrentMethod() {
-    val methodCandidates = Thread.currentThread().getStackTrace().filter(_.getClassName.startsWith(getClass.getName + "$anonfun$"))
+  private def setContext(implicit request: RequestHeader) {
+    
+    // request encoding
+    Play2TemplateUtils.encoding.set(request.charset.getOrElse(TemplateEngine.utils.getDefaultWebEncoding))
+    
+    // current method
+    val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(getClass.getName + "$anonfun$"))
     val trace = methodCandidates.headOption.getOrElse(throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not find current method in execution call", null))
     val name: Option[String] = methodNameExtractor.findFirstMatchIn(trace.getClassName.substring(getClass.getName.length())).map(_.group(1))
     if (name.isDefined)
@@ -75,8 +82,17 @@ trait GroovyTemplates {
         throw new TemplateNotFoundException("Template %s not found".format(html))
       }
     }
+    
+    def setLanguage() {
+      args.find(elem => elem._1.name == __LANG).map {
+        language => Play2TemplateUtils.language.set(language._2.toString)
+      }.getOrElse {
+        Play2TemplateUtils.language.set(lang.language)
+      }
+    }
 
     val n: String = if(name.isEmpty) {
+      setLanguage()
       inferTemplateName
     } else if(TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
       name.get

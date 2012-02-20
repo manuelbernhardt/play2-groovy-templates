@@ -47,10 +47,6 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def usePrecompiled() = Play.isProd
 
-  // TODO
-  def getDefaultWebEncoding = "utf-8"
-
- 
   def findTemplateWithPath(path: String): Play2VirtualFile = {
     for (p <- rootTemplatePaths) {
       val t = Play2VirtualFile.fromPath(p + path)
@@ -92,12 +88,6 @@ class Play2TemplateUtils extends TemplateUtils {
     oi.readObject
   }
 
-
-  // TODO
-  def getLang = Lang.defaultLang.language
-
-  def getMessage(key: Any, args: Object*) = Messages(key.toString, args : _ *)
-
   def getDateFormat = throw new RuntimeException("Not implemented")
 
   def getCurrencySymbol(p1: String) = throw new RuntimeException("Not implemented")
@@ -123,4 +113,34 @@ class Play2TemplateUtils extends TemplateUtils {
   def getAllClasses = current.plugin[GroovyTemplatesPlugin].map(_.getAllClasses).getOrElse(new ArrayList[Class[_]])
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
+
+
+  def getDefaultWebEncoding = "utf-8" // TODO read from config file
+
+  // per-request things, need a better place
+
+  def getCurrentResponseEncoding = Play2TemplateUtils.encoding.get
+
+  def getAuthenticityToken = "" // TODO implement. May have to move someplace else
+
+  def getLang = Play2TemplateUtils.language.get()
+
+  def getMessage(key: Any, args: Object*) = Messages(key.toString, args : _ *)(Lang(getLang))
+
+
+
+}
+
+object Play2TemplateUtils {
+
+  // per-request values. due to how the engine was ported from Play 1 it's the easiest for now to go with ThreadLocal-s
+  
+  val language = new ThreadLocal[String] {
+    override def initialValue() = Lang.defaultLang.language
+  }
+  
+  val encoding = new ThreadLocal[String] {
+    override def initialValue() = "utf-8" // TODO take from config file
+  }
+  
 }

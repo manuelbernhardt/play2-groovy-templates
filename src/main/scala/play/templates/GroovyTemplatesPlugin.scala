@@ -1,13 +1,11 @@
 package play.templates
 
 import play.api._
-import libs.Files
 import org.reflections._
 import scala.collection.JavaConverters._
 import collection.mutable.HashMap
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
-import java.io.File
 
 /**
  * Plugin for rendering Groovy templates
@@ -75,6 +73,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     }
   }
 
+  // TODO re-think this
   // this used to fetch only application classes, and probably some more
   // however the reason for it seems a little obscure, so we'll just take in the bare minimum necessary for things to work nicely
   def getAllClasses = {
