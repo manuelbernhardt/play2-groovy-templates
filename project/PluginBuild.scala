@@ -3,26 +3,38 @@ import Keys._
 
 object PluginBuild extends Build {
 
+  val buildVersion = "0.1-SNAPSHOT"
+
+  val delvingReleases = "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"
+  val delvingSnapshots = "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"
+  val delvingRepository = if(buildVersion.endsWith("SNAPSHOT")) delvingSnapshots else delvingReleases
+
   val dependencies = Seq(
-    "play" %% "play" % "2.0-RC3-SNAPSHOT",
-    "play" %% "groovy-template-engine" % "0.1-SNAPSHOT",
-    "org.codehaus.groovy" % "groovy" % "1.8.5",
-    "com.jamonapi" % "jamon" % "2.7", 
-    "commons-collections" % "commons-collections" % "3.2.1",
-    "commons-lang" % "commons-lang" % "2.6",
-    "commons-io" % "commons-io" % "2.0"
+    "play"                  %% "play"                         % "2.0-RC3-SNAPSHOT",
+    "eu.delving"            %  "groovy-templates-engine"      % "0.1-SNAPSHOT",
+    "commons-io"            %  "commons-io"                   % "2.0"
   )
 
   val main = Project(
-    id = "groovy-templates",
+    id = "groovy-templates-plugin",
     base = file(".")).settings(
-      organization := "play",
+      organization := "eu.delving",
+
+      version := buildVersion,
 
       resolvers += "jahia" at "http://maven.jahia.org/maven2",
 
+      resolvers += delvingReleases,
+
+      resolvers += delvingSnapshots,
+
       libraryDependencies ++= dependencies,
 
-      publishMavenStyle := false
+      publishTo := Some(delvingRepository),
+
+      credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+
+      publishMavenStyle := true
     )
 
 }
