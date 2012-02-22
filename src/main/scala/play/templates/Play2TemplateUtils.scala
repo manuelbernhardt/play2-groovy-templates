@@ -15,7 +15,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
   lazy val rootTemplatePaths = {
     val modules = Play2VirtualFile.fromPath("/modules")
-    val moduleRoots: List[String] = if(modules.isDirectory) modules.realFile.get.listFiles().filter(_.isDirectory).map(_.getName + "/app/views/").toList else List.empty
+    val moduleRoots: List[String] = if(modules.isDirectory) modules.realFile.get.listFiles().filter(_.isDirectory).map("/modules/" + _.getName + "/app/views/").toList else List.empty
     Seq("/app/views/") ++ moduleRoots
   }
 
