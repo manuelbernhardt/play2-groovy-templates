@@ -32,7 +32,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
 
     try {
         for (stackTraceElement <- e.getStackTrace) {
-          println(stackTraceElement.getClassName)
+//          println(stackTraceElement.getClassName + " " + stackTraceElement.getLineNumber)
             if (stackTraceElement.getClassName.equals(compiledTemplateName) || stackTraceElement.getClassName.startsWith(compiledTemplateName + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber)) {
                     throw new TemplateExecutionException.DoBodyException(e)
@@ -63,7 +63,13 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
             }
 
           // heuristic to see if we can show something relevant, at all
-          if(stackTraceElement.getLineNumber > 0 && stackTraceElement.getClassName.startsWith("/app/views")) {
+          val candidate = stackTraceElement.getLineNumber > 0 && (
+            stackTraceElement.getClassName.startsWith("/app/views") ||
+            stackTraceElement.getClassName.startsWith("controllers.") ||
+            stackTraceElement.getClassName.startsWith("views.")
+            )
+
+          if(candidate) {
             throw new groovy.TemplateExecutionException(
               e.getMessage,
               Some(stackTraceElement.getLineNumber),
