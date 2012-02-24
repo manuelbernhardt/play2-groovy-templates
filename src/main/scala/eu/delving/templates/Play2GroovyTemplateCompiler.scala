@@ -1,7 +1,8 @@
-package play.templates
+package eu.delving.templates
 
-import java.io.File
+import _root_.java.io.File
 import play.api.Play.current
+import play.templates.{GroovyTemplateCompiler, TemplateCompilationError}
 
 class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
 
@@ -25,17 +26,17 @@ class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
       if (group.startsWith(".Assets.at(")) {
         val matchedAsset = Option(assetsPatternSingleQuote.findFirstMatchIn(group).getOrElse(assetsPatternDoubleQuote.findFirstMatchIn(group).getOrElse(null)))
         if (matchedAsset.isDefined) {
-          println("\tout.print(_('controllers.routes').Assets.at(\"" + matchedAsset.get.group(1) + "\").url());")
+          super.println("\tout.print(_('controllers.routes').Assets.at(\"" + matchedAsset.get.group(1) + "\").url());")
         } else {
           invalidRouteDefinition(action)
         }
       } else {
-        print("\tout.print(_('" + matched.get.group(1) + "routes')" + group + ");")
+        super.print("\tout.print(_('" + matched.get.group(1) + "routes')" + group + ");")
       }
     } else {
       invalidRouteDefinition(action)
     }
     markLine(parser.getLine)
-    println()
+    super.println()
   }
 }

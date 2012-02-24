@@ -1,4 +1,4 @@
-package play.templates
+package eu.delving.templates
 
 /**
  * Groovy tweaks, taken from the play-scala plugin

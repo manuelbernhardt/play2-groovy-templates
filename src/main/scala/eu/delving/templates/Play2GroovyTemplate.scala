@@ -1,13 +1,13 @@
-package play.templates
+package eu.delving.templates
 
-import exceptions.TemplateExecutionException
-import java.lang.Throwable
-import TemplateEngineException.ExceptionType._
+import _root_.java.io.File
 import play.exceptions.TagInternalException
 import play.api.Play
 import play.api.Play.current
-import java.io.File
 import scalax.file.Path
+import play.templates.TemplateEngineException.ExceptionType._
+import play.templates.{TemplateEngine, TemplateCompilationError, TemplateEngineException, GroovyTemplate}
+import play.templates.exceptions.TemplateExecutionException
 
 class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(name, source) {
 
@@ -15,7 +15,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
     this("", source)
   }
 
-  def handleException(e: TemplateEngineException) {
+  override def handleException(e: TemplateEngineException) {
     // TODO better handling
     e.getExceptionType match {
       case NO_ROUTE_FOUND =>
@@ -28,12 +28,14 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
     }
   }
 
-  def throwException(e: Throwable) {
+  override def throwException(e: Throwable) {
 
     try {
         for (stackTraceElement <- e.getStackTrace) {
-//          println(stackTraceElement.getClassName + " " + stackTraceElement.getLineNumber)
-            if (stackTraceElement.getClassName.equals(compiledTemplateName) || stackTraceElement.getClassName.startsWith(compiledTemplateName + "$_run_closure")) {
+          val cName: String = stackTraceElement.getClassName
+
+//          println(cName + " " + stackTraceElement.getLineNumber)
+            if (cName.equals(compiledTemplateName) || cName.startsWith(compiledTemplateName + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber)) {
                     throw new TemplateExecutionException.DoBodyException(e)
                 } else if(e.isInstanceOf[TemplateCompilationError]) {
@@ -42,7 +44,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
                     throw cleanStackTrace(e).asInstanceOf[TagInternalException]
                 } else if (e.isInstanceOf[TemplateExecutionException]) {
                     val ex = e.asInstanceOf[TemplateExecutionException]
-                    val pe = new groovy.TemplateExecutionException(
+                    val pe = new eu.delving.templates.exceptions.TemplateExecutionException(
                       ex.getMessage,
                       Some(ex.getLineNumber.toInt),
                       None,
@@ -50,8 +52,10 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
                       Some(ex.getTemplate.getName)
                     )
                     throw cleanStackTrace(pe)
+                } else if(e.isInstanceOf[eu.delving.templates.exceptions.TemplateExecutionException]) {
+                  throw e
                 } else {
-                    val t = new groovy.TemplateExecutionException(
+                    val t = new eu.delving.templates.exceptions.TemplateExecutionException(
                       e.getMessage,
                       Some(this.linesMatrix.get(stackTraceElement.getLineNumber)),
                       None,
@@ -64,19 +68,29 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
 
           // heuristic to see if we can show something relevant, at all
           val candidate = stackTraceElement.getLineNumber > 0 && (
-            stackTraceElement.getClassName.startsWith("/app/views") ||
-            stackTraceElement.getClassName.startsWith("controllers.") ||
-            stackTraceElement.getClassName.startsWith("views.")
+            cName.startsWith("/app/views") ||
+            cName.startsWith("controllers.") ||
+            cName.startsWith("views.")
             )
 
           if(candidate) {
-            throw new groovy.TemplateExecutionException(
+
+            val className = if(cName.endsWith("$")) cName.substring(0, cName.length() - 1) else cName
+            val fileName = if(!className.startsWith("/app/views")) {
+              // TODO will not work for modules
+              val path = "/app/" + className.replaceAll("\\.", "/")
+              val scala = path  + ".scala"
+              val java = path + ".java"
+              if(Play.getExistingFile(scala).isDefined) scala else java
+            } else className
+
+            throw new eu.delving.templates.exceptions.TemplateExecutionException(
               e.getMessage,
               Some(stackTraceElement.getLineNumber),
               None,
               None,
-              Some(this.getName),
-              Some(Path(Play.getFile(stackTraceElement.getClassName)))
+              Some(fileName),
+              Some(Path(Play.getFile(fileName)))
             )
           }
         }

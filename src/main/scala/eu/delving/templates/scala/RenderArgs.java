@@ -1,4 +1,4 @@
-package play.templates.groovy;
+package eu.delving.templates.scala;
 
 import java.util.HashMap;
 import java.util.Map;

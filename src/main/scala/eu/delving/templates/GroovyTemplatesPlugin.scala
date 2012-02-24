@@ -1,12 +1,12 @@
-package play.templates
+package eu.delving.templates
 
+import _root_.java.util.ArrayList
+import _root_.java.util.concurrent.ConcurrentHashMap
 import play.api._
 import org.reflections._
-import scala.collection.JavaConverters._
+import _root_.scala.collection.JavaConverters._
 import collection.mutable.HashMap
-import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
-
+import play.templates.{GenericTemplateLoader, TemplateEngine}
 /**
  * Plugin for rendering Groovy templates
  *
@@ -635,7 +635,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     allClassesCache
   }
 
-  def renderTemplate(name: String, args: Map[String, Any]) = {
+  def renderTemplate(name: String, args: Map[String, Any]): Either[Throwable, String] = {
 
     try {
       val n = System.currentTimeMillis()

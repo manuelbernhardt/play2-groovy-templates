@@ -1,15 +1,16 @@
-package play.templates
+package eu.delving.templates
 
-import groovy.WrappedMessages
+import eu.delving.templates.scala.WrappedMessages
 import play.api._
 import i18n.{Lang, Messages}
 import play.libs._
-import java.lang.{Throwable, Integer, String, Class}
+import _root_.java.lang.{Throwable, Integer, String, Class}
 import play.api.Play.current
-import scala.collection.JavaConversions.asJavaCollection
+import _root_.scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
-import java.io._
-import java.util.ArrayList
+import _root_.java.io._
+import _root_.java.util.ArrayList
+import play.templates.{PlayVirtualFile, TemplateUtils}
 
 class Play2TemplateUtils extends TemplateUtils {
 
@@ -134,6 +135,10 @@ class Play2TemplateUtils extends TemplateUtils {
 object Play2TemplateUtils {
 
   // per-request values. due to how the engine was ported from Play 1 it's the easiest for now to go with ThreadLocal-s
+  
+  val sessionId = new ThreadLocal[String] {
+    override def initialValue() = ""
+  }
   
   val language = new ThreadLocal[String] {
     override def initialValue() = Lang.defaultLang.language

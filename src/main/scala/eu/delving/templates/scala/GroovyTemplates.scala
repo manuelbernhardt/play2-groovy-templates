@@ -1,4 +1,4 @@
-package play.templates.groovy
+package eu.delving.templates.scala
 
 import play.templates.TemplateEngineException.ExceptionType
 import play.api.http.{ContentTypeOf, ContentTypes}
@@ -7,7 +7,9 @@ import play.api.libs.MimeTypes
 import scala.collection.JavaConverters._
 import play.api.mvc._
 import play.api.i18n.Messages
-import play.templates.{Play2TemplateUtils, TemplateEngine, GroovyTemplatesPlugin, TemplateEngineException}
+import play.templates.{TemplateEngine, TemplateEngineException}
+import eu.delving.templates.exceptions.TemplateNotFoundException
+import eu.delving.templates.{GroovyTemplatesPlugin, Play2TemplateUtils}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
@@ -17,9 +19,11 @@ import play.templates.{Play2TemplateUtils, TemplateEngine, GroovyTemplatesPlugin
 
 trait GroovyTemplates {
   self: Controller =>
-  
+
   // if a language parameter is passed in with the parameters we use this one for language resolution
   protected val __LANG: String = "__LANG"
+
+  protected val __SESSION_ID: String = "__SESSION_ID"
 
   implicit def renderArgs: RichRenderArgs = new RichRenderArgs(RenderArgs.current())
 
@@ -52,10 +56,10 @@ trait GroovyTemplates {
   private val methodNameExtractor = """\$anonfun\$([^\$]*)(.*)""".r
 
   private def setContext(implicit request: RequestHeader) {
-    
+
     // request encoding
     Play2TemplateUtils.encoding.set(request.charset.getOrElse(TemplateEngine.utils.getDefaultWebEncoding))
-    
+
     // current method
     val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(getClass.getName + "$anonfun$"))
     val trace = methodCandidates.headOption.getOrElse(throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not find current method in execution call", null))
@@ -74,15 +78,15 @@ trait GroovyTemplates {
       val html = prefix + ".html"
       val txt = prefix + ".txt"
 
-      if(TemplateEngine.utils.findTemplateWithPath(html).exists()) {
+      if (TemplateEngine.utils.findTemplateWithPath(html).exists()) {
         html
-      } else if(TemplateEngine.utils.findTemplateWithPath(txt).exists()) {
+      } else if (TemplateEngine.utils.findTemplateWithPath(txt).exists()) {
         txt
       } else {
-        throw new TemplateNotFoundException("Template %s not found".format(html))
+        throw new TemplateNotFoundException("Template '%s' not found".format(html))
       }
     }
-    
+
     def setLanguage() {
       args.find(elem => elem._1.name == __LANG).map {
         language => Play2TemplateUtils.language.set(language._2.toString)
@@ -91,10 +95,17 @@ trait GroovyTemplates {
       }
     }
 
-    val n: String = if(name.isEmpty) {
+    def setSessionId() {
+      args.find(elem => elem._1.name == __LANG).map {
+        sid => Play2TemplateUtils.sessionId.set(sid._2.toString)
+      }
+    }
+
+    val n: String = if (name.isEmpty) {
       setLanguage()
+      setSessionId()
       inferTemplateName
-    } else if(TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
+    } else if (TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
       name.get
     } else {
       throw new TemplateNotFoundException("Template %s not found".format(name))
@@ -121,21 +132,24 @@ trait GroovyTemplates {
 class WrappedMessages {
 
   def get(key: String) = Messages(key)
+
   def get(key: String, arg1: String) = Messages(key, arg1)
+
   def get(key: String, arg1: String, arg2: String) = Messages(key, arg1, arg2)
+
   def get(key: String, arg1: String, arg2: String, arg3: String) = Messages(key, arg1, arg2, arg3)
 
 }
 
 case class GroovyTemplateContent(body: String, contentType: String) extends Content
 
-private[groovy] class RichRenderArgs(val renderArgs: RenderArgs) {
+private[scala] class RichRenderArgs(val renderArgs: RenderArgs) {
 
   def +=(variable: Tuple2[String, Any]) = {
     renderArgs.put(variable._1, variable._2)
     this
   }
-  
+
   def get(key: String, clazz: Class[_]) = renderArgs.get(key, clazz)
 
   def apply(key: String) = {

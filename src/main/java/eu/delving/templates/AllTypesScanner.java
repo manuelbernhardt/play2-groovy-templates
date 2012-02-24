@@ -1,4 +1,4 @@
-package play.templates;
+package eu.delving.templates;
 
 import org.reflections.scanners.AbstractScanner;
 
