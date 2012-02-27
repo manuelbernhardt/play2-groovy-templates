@@ -10,7 +10,7 @@ object PluginBuild extends Build {
   val delvingRepository = if(buildVersion.endsWith("SNAPSHOT")) delvingSnapshots else delvingReleases
 
   val dependencies = Seq(
-    "play"                  %% "play"                         % "2.0-RC3-SNAPSHOT",
+    "play"                  %% "play"                         % "2.0-SNAPSHOT",
     "eu.delving"            %  "groovy-templates-engine"      % "0.5",
     "commons-io"            %  "commons-io"                   % "2.0"
   )
