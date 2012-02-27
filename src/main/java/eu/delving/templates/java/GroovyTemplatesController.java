@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class GroovyTemplatesController extends Controller {
     
-    public GroovyTemplateContentBuilder Template(String name) {
+    public static GroovyTemplateContentBuilder Template(String name) {
 
         PlayVirtualFile template = TemplateEngine.utils.findTemplateWithPath(name);
         if(!template.exists()) {
@@ -35,38 +35,20 @@ public class GroovyTemplatesController extends Controller {
         }
 
         // set the language
-        if(getLang() != null) {
-            eu.delving.templates.Play2TemplateUtils$.MODULE$.language().set(getLang());
-        } else {
-            eu.delving.templates.Play2TemplateUtils$.MODULE$.language().set(lang().language());
-        }
-        
+        eu.delving.templates.Play2TemplateUtils$.MODULE$.language().set(lang().language());
+
         // set the session ID
-        eu.delving.templates.Play2TemplateUtils$.MODULE$.sessionId().set(getSessionId());
+        // TODO
+//        eu.delving.templates.Play2TemplateUtils$.MODULE$.sessionId().set(getSessionId());
         
         return new GroovyTemplateContentBuilder(name, contentType, renderArgs);
     }
     
-    protected Map<String, Object> renderArgs = new HashMap<String, Object>();
-
-
-    /**
-     * Override this method to specify a custom way of setting the template language
-     */
-    protected String getLang() {
-        return null;
-    }
-
-    /**
-     * Override thius method to specify a session ID (used e.g. by the #{authenticityToken /} tag)
-     */
-    protected String getSessionId() {
-        return "";
-    }
+    protected static Map<String, Object> renderArgs = new HashMap<String, Object>();
 
 
 
-    static class GroovyTemplateContentBuilder {
+    public static class GroovyTemplateContentBuilder {
 
         private final String name;
         private final String contentType;
@@ -88,6 +70,7 @@ public class GroovyTemplatesController extends Controller {
 
             Map<String, Object> binding = new HashMap<String, Object>();
             binding.putAll(renderArgs);
+            binding.putAll(args);
             binding.put("request", request().args);
             binding.put("session", session());
             binding.put("flash", flash());
@@ -104,7 +87,7 @@ public class GroovyTemplatesController extends Controller {
         }
 
 
-        public GroovyTemplateContentBuilder param(String k1, Object v1) {
+        public GroovyTemplateContentBuilder params(String k1, Object v1) {
             args.put(k1, v1);
             return this;
         }
