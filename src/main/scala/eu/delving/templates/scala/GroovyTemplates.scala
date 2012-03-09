@@ -45,7 +45,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, Seq())
     } finally {
-      RenderArgs.current().set(new RenderArgs)
+      RenderArgs.current.set(new RenderArgs)
     }
   }
 
@@ -54,7 +54,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, args)
     } finally {
-      RenderArgs.current().set(new RenderArgs)
+      RenderArgs.current.set(new RenderArgs)
     }
   }
 
@@ -63,7 +63,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(Some(name), args)
     } finally {
-      RenderArgs.current().set(new RenderArgs)
+      RenderArgs.current.set(new RenderArgs)
     }
   }
 
