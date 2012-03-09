@@ -41,10 +41,15 @@ public class GroovyTemplatesController extends Controller {
         // TODO
 //        eu.delving.templates.Play2TemplateUtils$.MODULE$.sessionId().set(getSessionId());
         
-        return new GroovyTemplateContentBuilder(name, contentType, renderArgs);
+        return new GroovyTemplateContentBuilder(name, contentType, renderArgs.get());
     }
     
-    protected static Map<String, Object> renderArgs = new HashMap<String, Object>();
+    protected static ThreadLocal<Map<String, Object>> renderArgs = new ThreadLocal<Map<String, Object>>() {
+        @Override
+        protected Map<String, Object> initialValue() {
+            return new HashMap<String, Object>();
+        }
+    };
 
 
 

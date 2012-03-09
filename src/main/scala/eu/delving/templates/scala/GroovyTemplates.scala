@@ -25,7 +25,9 @@ trait GroovyTemplates {
 
   protected val __SESSION_ID: String = "__SESSION_ID"
 
-  implicit def renderArgs: RichRenderArgs = new RichRenderArgs(RenderArgs.current())
+  implicit def richRenderArgs(x: RenderArgs): RichRenderArgs = new RichRenderArgs(RenderArgs.current())
+
+  implicit def renderArgs = RenderArgs.current()
 
   private def className = {
     val name = getClass.getName
