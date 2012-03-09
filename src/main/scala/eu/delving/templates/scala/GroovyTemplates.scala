@@ -41,18 +41,30 @@ trait GroovyTemplates {
   private implicit val currentMethod: ThreadLocal[String] = new ThreadLocal[String]()
 
   def Template(implicit request: Request[_]) = {
-    setContext(request)
-    renderGroovyTemplate(None, Seq())
+    try {
+      setContext(request)
+      renderGroovyTemplate(None, Seq())
+    } finally {
+      RenderArgs.current().set(new RenderArgs)
+    }
   }
 
   def Template(args: (Symbol, Any)*)(implicit request: Request[_]) = {
-    setContext(request)
-    renderGroovyTemplate(None, args)
+    try {
+      setContext(request)
+      renderGroovyTemplate(None, args)
+    } finally {
+      RenderArgs.current().set(new RenderArgs)
+    }
   }
 
   def Template(name: String, args: (Symbol, Any)*)(implicit request: Request[_]) = {
-    setContext(request)
-    renderGroovyTemplate(Some(name), args)
+    try {
+      setContext(request)
+      renderGroovyTemplate(Some(name), args)
+    } finally {
+      RenderArgs.current().set(new RenderArgs)
+    }
   }
 
   private val methodNameExtractor = """\$anonfun\$([^\$]*)(.*)""".r
