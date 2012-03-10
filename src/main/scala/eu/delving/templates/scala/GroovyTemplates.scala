@@ -6,10 +6,10 @@ import play.api.Play.current
 import play.api.libs.MimeTypes
 import scala.collection.JavaConverters._
 import play.api.mvc._
-import play.api.i18n.Messages
 import play.templates.{TemplateEngine, TemplateEngineException}
 import eu.delving.templates.exceptions.TemplateNotFoundException
 import eu.delving.templates.{GroovyTemplatesPlugin, Play2TemplateUtils}
+import play.api.i18n.{Lang, Messages}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
@@ -45,7 +45,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, Seq())
     } finally {
-      RenderArgs.current.set(new RenderArgs)
+      cleanup()
     }
   }
 
@@ -54,7 +54,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, args)
     } finally {
-      RenderArgs.current.set(new RenderArgs)
+      cleanup()
     }
   }
 
@@ -63,7 +63,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(Some(name), args)
     } finally {
-      RenderArgs.current.set(new RenderArgs)
+      cleanup()
     }
   }
 
@@ -85,6 +85,13 @@ trait GroovyTemplates {
 
   }
 
+  private def cleanup() {
+    RenderArgs.current.set(new RenderArgs)
+    Play2TemplateUtils.encoding.remove()
+    Play2TemplateUtils.language.remove()
+    Play2TemplateUtils.sessionId.remove()
+  }
+
   private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
 
     def inferTemplateName = {
@@ -101,23 +108,21 @@ trait GroovyTemplates {
       }
     }
 
-    def setLanguage() {
-      args.find(elem => elem._1.name == __LANG).map {
+    def setLanguage(arguments: Map[String, Any]) {
+      arguments.find(elem => elem._1 == __LANG).map {
         language => Play2TemplateUtils.language.set(language._2.toString)
       }.getOrElse {
         Play2TemplateUtils.language.set(lang.language)
       }
     }
 
-    def setSessionId() {
-      args.find(elem => elem._1.name == __LANG).map {
+    def setSessionId(arguments: Map[String, Any]) {
+      arguments.find(elem => elem._1 == __SESSION_ID).map {
         sid => Play2TemplateUtils.sessionId.set(sid._2.toString)
       }
     }
 
     val n: String = if (name.isEmpty) {
-      setLanguage()
-      setSessionId()
       inferTemplateName
     } else if (TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
       name.get
@@ -134,6 +139,9 @@ trait GroovyTemplates {
       "messages" -> new WrappedMessages
     )
 
+    setLanguage(binding ++ callArgs)
+    setSessionId(binding ++ callArgs)
+
     val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, binding ++ callArgs)).getOrElse(Right("")).fold(
       left => "",
       right => right
@@ -145,13 +153,15 @@ trait GroovyTemplates {
 
 class WrappedMessages {
 
-  def get(key: String) = Messages(key)
+  private val lang = Lang(Play2TemplateUtils.language.get())
 
-  def get(key: String, arg1: String) = Messages(key, arg1)
+  def get(key: String) = Messages(key)(lang)
 
-  def get(key: String, arg1: String, arg2: String) = Messages(key, arg1, arg2)
+  def get(key: String, arg1: String) = Messages(key, arg1)(lang)
 
-  def get(key: String, arg1: String, arg2: String, arg3: String) = Messages(key, arg1, arg2, arg3)
+  def get(key: String, arg1: String, arg2: String) = Messages(key, arg1, arg2)(lang)
+
+  def get(key: String, arg1: String, arg2: String, arg3: String) = Messages(key, arg1, arg2, arg3)(lang)
 
 }
 
