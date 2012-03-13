@@ -1,6 +1,6 @@
 # Groovy templates for Play! 2
 
-Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1, and this plugin makes the integration with Play 2 possible. Due to some differences in the API not all things are working yet in Play 2, but most of them are.
+Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1, and this plugin makes the integration with Play 2 possible.
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 

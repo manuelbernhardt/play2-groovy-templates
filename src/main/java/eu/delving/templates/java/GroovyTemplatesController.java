@@ -76,7 +76,7 @@ public class GroovyTemplatesController extends Controller {
             Map<String, Object> binding = new HashMap<String, Object>();
             binding.putAll(renderArgs);
             binding.putAll(args);
-            binding.put("request", request().args);
+            binding.put("request", ctx().args);
             binding.put("session", session());
             binding.put("flash", flash());
             binding.put("params", request().queryString());

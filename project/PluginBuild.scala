@@ -3,14 +3,14 @@ import Keys._
 
 object PluginBuild extends Build {
 
-  val buildVersion = "1.0-SNAPSHOT"
+  val buildVersion = "1.0"
 
   val delvingReleases = "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/repositories/releases"
   val delvingSnapshots = "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"
   val delvingRepository = if(buildVersion.endsWith("SNAPSHOT")) delvingSnapshots else delvingReleases
 
   val dependencies = Seq(
-    "play"                  %% "play"                         % "2.0-SNAPSHOT",
+    "play"                  %% "play"                         % "2.0",
     "eu.delving"            %  "groovy-templates-engine"      % "0.5",
     "commons-io"            %  "commons-io"                   % "2.0"
   )
