@@ -1,14 +1,24 @@
 # Groovy templates for Play! 2
 
-Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1, and this plugin makes the integration with Play 2 possible.
+Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1.
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.0"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.1"`
 - resolvers:
   - `"Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"`
   - `"Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"`
 
+
+## Changelog
+
+### 1.1 - 21.03.2012
+
+- fixing issue with access to language, messages and render args
+- using play-groovy-templates 0.6: passing all necessary values for template rendering at template invocation time 
+- improvements in the Java API
+
+### 1.0 - 13.03.2012
 
 ## Scala
 
@@ -33,7 +43,7 @@ This will render the `/app/views/fooAction.html` template, and pass the argument
 
 - i18n: By default, the language resolved via the implicit `lang` method is used. If however for whatever reason you need to override this at template render time (which may happen if you implement your own session-based language management), you can override the language by passing a `__LANG` parameter to the arguments (or renderArgs). In this case, you need to pass a language code.
 
-- sessionId: Play 1 has the concept of sessionId which is used e.g. in the `#{authenticityToken /}` tag. If you want to set one for template rendering, you can do this by passing it to the arguments as `__SESSION_ID` parameter
+- autheniticty token: Play 1 has the concept of authenticity token which is used e.g. in the `#{authenticityToken /}` tag. If you want to set one for template rendering, you can do this by passing it to the arguments as `__AUTH_TOKEN` parameter
 
 
 ## Java
@@ -48,4 +58,4 @@ The Java API is less developed than the Scala one, but it is there nonetheless. 
 
 This will render the template `/app/views/index.html` and pass the parameters `foo` with the value `bar` and `foo2` with the value `42`.
 
-
+- i18n: By default, the language resolved via the `lang()` call of the controller is used. This can be overriden by passing in a `__LANG` parameter
