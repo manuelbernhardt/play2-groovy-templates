@@ -97,9 +97,9 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def parseDuration(duration: String) = Time.parseDuration(duration)
 
-  def getMessages = new WrappedMessages
-
   def getPlay = Play
+
+  def getMessages(language: String): AnyRef = new WrappedMessages(language)
 
   def getCached(key: String) = Cache.get(key)
 
@@ -115,37 +115,8 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
 
-
   def getDefaultWebEncoding = "utf-8" // TODO read from config file
 
-  // per-request things, need a better place
+  def getMessage(language: String, key: Any, args: AnyRef*): String = Messages(key.toString, args : _ *)(Lang(language))
 
-  def getCurrentResponseEncoding = Play2TemplateUtils.encoding.get
-
-  def getAuthenticityToken = "" // TODO implement. May have to move someplace else
-
-  def getLang = Play2TemplateUtils.language.get()
-
-  def getMessage(key: Any, args: Object*) = Messages(key.toString, args : _ *)(Lang(getLang))
-
-
-
-}
-
-object Play2TemplateUtils {
-
-  // per-request values. due to how the engine was ported from Play 1 it's the easiest for now to go with ThreadLocal-s
-  
-  val sessionId = new ThreadLocal[String] {
-    override def initialValue() = ""
-  }
-  
-  val language = new ThreadLocal[String] {
-    override def initialValue() = Lang.defaultLang.language
-  }
-  
-  val encoding = new ThreadLocal[String] {
-    override def initialValue() = "utf-8" // TODO take from config file
-  }
-  
 }

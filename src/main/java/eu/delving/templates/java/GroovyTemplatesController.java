@@ -19,8 +19,15 @@ import java.util.Map;
  *
  * @author Manuel Bernhardt <bernhardt.manuel@gmail.com>
  */
+@SuppressWarnings("unchecked")
 public class GroovyTemplatesController extends Controller {
+
+    public static String __LANG = "__LANG";
+
+    public static String __AUTH_TOKEN = "__AUTH_TOKEN";
     
+    private static String __RENDER_ARGS = "__RENDER_ARGS";
+
     public static GroovyTemplateContentBuilder Template(String name) {
 
         PlayVirtualFile template = TemplateEngine.utils.findTemplateWithPath(name);
@@ -34,24 +41,18 @@ public class GroovyTemplatesController extends Controller {
             contentType = maybeContentType.get().toString();
         }
 
-        // set the language
-        eu.delving.templates.Play2TemplateUtils$.MODULE$.language().set(lang().language());
-
-        // set the session ID
-        // TODO
-//        eu.delving.templates.Play2TemplateUtils$.MODULE$.sessionId().set(getSessionId());
-        
-        return new GroovyTemplateContentBuilder(name, contentType, renderArgs.get());
+        return new GroovyTemplateContentBuilder(name, contentType, renderArgs());
     }
     
-    protected static ThreadLocal<Map<String, Object>> renderArgs = new ThreadLocal<Map<String, Object>>() {
-        @Override
-        protected Map<String, Object> initialValue() {
-            return new HashMap<String, Object>();
+    protected static Map<String, Object> renderArgs() {
+        Object args = ctx().args.get(__RENDER_ARGS);
+        if(args == null) {
+            args = new HashMap<String, Object>();
+            ctx().args.put(__RENDER_ARGS, args);
         }
-    };
-
-
+        return (Map<String, Object>) args;
+    }
+    
 
     public static class GroovyTemplateContentBuilder {
 
@@ -81,8 +82,15 @@ public class GroovyTemplatesController extends Controller {
             binding.put("flash", flash());
             binding.put("params", request().queryString());
             binding.put("messages", new Messages());
+            
+            String lang = lang().language();
+            if(renderArgs.containsKey(GroovyTemplatesController.__LANG)) {
+                lang = renderArgs.get(__LANG).toString();
+            }
 
-            scala.collection.immutable.Map<String,Object> map = Scala.asScala(binding);
+            binding.put("lang", lang);
+
+            scala.collection.immutable.Map<String, Object> map = Scala.asScala(binding);
             Either<Throwable,String> either = Play.application().plugin(GroovyTemplatesPlugin.class).renderTemplate(name, map);
             if(either.isRight()) {
                 return either.right().get();

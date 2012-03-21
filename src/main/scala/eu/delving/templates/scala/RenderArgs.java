@@ -1,20 +1,28 @@
 package eu.delving.templates.scala;
 
+import play.api.mvc.RequestHeader;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RenderArgs {
 
-    public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
-    public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>() {
-        @Override
-        protected RenderArgs initialValue() {
-            return new RenderArgs();
-        }
-    };
+    public static Map<RequestHeader, RenderArgs> args = new ConcurrentHashMap<RequestHeader, RenderArgs>();
 
-    public static RenderArgs current() {
-        return current.get();
+    public Map<String, Object> data = new HashMap<String, Object>();
+
+    public static RenderArgs renderArgs(RequestHeader requestHeader) {
+        RenderArgs arguments = args.get(requestHeader);
+        if(arguments == null) {
+            arguments = new RenderArgs();
+            args.put(requestHeader, arguments);
+        }
+        return arguments;
+    }
+
+    public static void cleanup(RequestHeader requestHeader) {
+        args.remove(requestHeader);
     }
 
     public void put(String key, Object arg) {

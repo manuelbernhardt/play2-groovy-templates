@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 import play.api.mvc._
 import play.templates.{TemplateEngine, TemplateEngineException}
 import eu.delving.templates.exceptions.TemplateNotFoundException
-import eu.delving.templates.{GroovyTemplatesPlugin, Play2TemplateUtils}
+import eu.delving.templates.GroovyTemplatesPlugin
 import play.api.i18n.{Lang, Messages}
 
 /**
@@ -23,11 +23,15 @@ trait GroovyTemplates {
   // if a language parameter is passed in with the parameters we use this one for language resolution
   protected val __LANG: String = "__LANG"
 
-  protected val __SESSION_ID: String = "__SESSION_ID"
+  protected val __AUTH_TOKEN: String = "__AUTH_TOKEN"
+
+  protected val __RESPONSE_ENCODING: String = "__RESPONSE_ENCODING"
 
   implicit def richRenderArgs(x: RenderArgs): RichRenderArgs = new RichRenderArgs(x)
 
-  implicit def renderArgs = RenderArgs.current()
+  implicit def renderArgs()(implicit request: RequestHeader) = RenderArgs.renderArgs(request)
+
+  implicit def renderArgs(key: String)(implicit request: RequestHeader) = RenderArgs.renderArgs(request)(key)
 
   private def className = {
     val name = getClass.getName
@@ -45,7 +49,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, Seq())
     } finally {
-      cleanup()
+      cleanup(request)
     }
   }
 
@@ -54,7 +58,7 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(None, args)
     } finally {
-      cleanup()
+      cleanup(request)
     }
   }
 
@@ -63,16 +67,13 @@ trait GroovyTemplates {
       setContext(request)
       renderGroovyTemplate(Some(name), args)
     } finally {
-      cleanup()
+      cleanup(request)
     }
   }
 
   private val methodNameExtractor = """\$anonfun\$([^\$]*)(.*)""".r
 
   private def setContext(implicit request: RequestHeader) {
-
-    // request encoding
-    Play2TemplateUtils.encoding.set(request.charset.getOrElse(TemplateEngine.utils.getDefaultWebEncoding))
 
     // current method
     val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(getClass.getName + "$anonfun$"))
@@ -85,11 +86,8 @@ trait GroovyTemplates {
 
   }
 
-  private def cleanup() {
-    RenderArgs.current.set(new RenderArgs)
-    Play2TemplateUtils.encoding.remove()
-    Play2TemplateUtils.language.remove()
-    Play2TemplateUtils.sessionId.remove()
+  private def cleanup(request: RequestHeader) {
+    RenderArgs.cleanup(request)
   }
 
   private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
@@ -108,20 +106,6 @@ trait GroovyTemplates {
       }
     }
 
-    def setLanguage(arguments: Map[String, Any]) {
-      arguments.find(elem => elem._1 == __LANG).map {
-        language => Play2TemplateUtils.language.set(language._2.toString)
-      }.getOrElse {
-        Play2TemplateUtils.language.set(lang.language)
-      }
-    }
-
-    def setSessionId(arguments: Map[String, Any]) {
-      arguments.find(elem => elem._1 == __SESSION_ID).map {
-        sid => Play2TemplateUtils.sessionId.set(sid._2.toString)
-      }
-    }
-
     val n: String = if (name.isEmpty) {
       inferTemplateName
     } else if (TemplateEngine.utils.findTemplateWithPath(name.get).exists()) {
@@ -131,18 +115,28 @@ trait GroovyTemplates {
     }
 
     val callArgs = args.map(e => (e._1.name, e._2)).toMap
-    val binding: Map[String, AnyRef] = RenderArgs.current().data.asScala.toMap ++ Map(
+    val renderArguments = renderArgs.data.asScala.toMap
+
+    val contextArgs = callArgs ++ renderArguments
+
+    val language = if(contextArgs.contains(__LANG)) contextArgs(__LANG).toString else lang.language
+
+    // TODO also pass in the response encoding
+
+
+    val binding: Map[String, AnyRef] = Map(
       "request" -> request, // TODO pass in the args of the session rather than the object, once it will be implemented in Play
       "session" -> request.session.data.asJava,
       "flash" -> request.flash.data.asJava,
       "params" -> request.queryString.asJava, // TODO not sure if we shouldn't call this one "queryString" instead
-      "messages" -> new WrappedMessages
+      "messages" -> new WrappedMessages(language),
+      "lang" -> language
+
     )
+    
+//    val args = binding ++ callArgs
 
-    setLanguage(binding ++ callArgs)
-    setSessionId(binding ++ callArgs)
-
-    val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, binding ++ callArgs)).getOrElse(Right("")).fold(
+    val body = current.plugin[GroovyTemplatesPlugin].map(_.renderTemplate(n, renderArguments ++ callArgs ++ binding)).getOrElse(Right("")).fold(
       left => "",
       right => right
     )
@@ -151,9 +145,9 @@ trait GroovyTemplates {
   }
 }
 
-class WrappedMessages {
+class WrappedMessages(language: String) {
 
-  private val lang = Lang(Play2TemplateUtils.language.get())
+  private val lang = Lang(language)
 
   def get(key: String) = Messages(key)(lang)
 
