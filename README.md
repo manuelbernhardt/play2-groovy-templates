@@ -4,7 +4,7 @@ Groovy template mechanism for Play! 2, to make the migration between Play 1 and 
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.0-SNAPSHOT"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.0"`
 - resolvers:
   - `"Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"`
   - `"Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"`
