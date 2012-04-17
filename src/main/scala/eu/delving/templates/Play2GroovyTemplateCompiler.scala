@@ -17,7 +17,6 @@ class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
     val assetsPatternDoubleQuote = """"(.*?)"""".r
     val action: String = parser.getToken.trim
 
-    // TODO absolute actions @@{ ... }
     // Play 2 routes live in a routes package object
     val matched = actionPattern.findFirstMatchIn(action)
     if (matched.isDefined) {
@@ -26,12 +25,20 @@ class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
       if (group.startsWith(".Assets.at(")) {
         val matchedAsset = Option(assetsPatternSingleQuote.findFirstMatchIn(group).getOrElse(assetsPatternDoubleQuote.findFirstMatchIn(group).getOrElse(null)))
         if (matchedAsset.isDefined) {
-          super.println("\tout.print(_('controllers.routes').Assets.at(\"" + matchedAsset.get.group(1) + "\").url());")
+          if(absolute) {
+            super.println("\tout.print('http://' + _('httpRequest').host + _('controllers.routes').Assets.at(\"" + matchedAsset.get.group(1) + "\").url());")
+          } else {
+            super.println("\tout.print(_('controllers.routes').Assets.at(\"" + matchedAsset.get.group(1) + "\").url());")
+          }
         } else {
           invalidRouteDefinition(action)
         }
       } else {
-        super.print("\tout.print(_('" + matched.get.group(1) + "routes')" + group + ");")
+        if(absolute) {
+          super.print("\tout.print('http://' + _('httpRequest').host + _('" + matched.get.group(1) + "routes')" + group + ");")
+        } else {
+          super.print("\tout.print(_('" + matched.get.group(1) + "routes')" + group + ");")
+        }
       }
     } else {
       invalidRouteDefinition(action)

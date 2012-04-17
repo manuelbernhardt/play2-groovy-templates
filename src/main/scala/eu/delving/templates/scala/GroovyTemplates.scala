@@ -44,7 +44,7 @@ trait GroovyTemplates {
 
   private implicit val currentMethod: ThreadLocal[String] = new ThreadLocal[String]()
 
-  def Template(implicit request: Request[_]) = {
+  def Template(implicit request: RequestHeader) = {
     try {
       setContext(request)
       renderGroovyTemplate(None, Seq())
@@ -53,7 +53,7 @@ trait GroovyTemplates {
     }
   }
 
-  def Template(args: (Symbol, Any)*)(implicit request: Request[_]) = {
+  def Template(args: (Symbol, Any)*)(implicit request: RequestHeader) = {
     try {
       setContext(request)
       renderGroovyTemplate(None, args)
@@ -62,7 +62,7 @@ trait GroovyTemplates {
     }
   }
 
-  def Template(name: String, args: (Symbol, Any)*)(implicit request: Request[_]) = {
+  def Template(name: String, args: (Symbol, Any)*)(implicit request: RequestHeader) = {
     try {
       setContext(request)
       renderGroovyTemplate(Some(name), args)
@@ -90,7 +90,7 @@ trait GroovyTemplates {
     RenderArgs.cleanup(request)
   }
 
-  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: Request[_], currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
+  private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: RequestHeader, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
 
     def inferTemplateName = {
       val prefix = (if (className.startsWith("controllers")) className.substring("controllers.".length) else className).replaceAll("\\.", "/") + "/" + currentMethod.get()
@@ -125,6 +125,7 @@ trait GroovyTemplates {
 
 
     val binding: Map[String, AnyRef] = Map(
+      "httpRequest" -> request,
       "request" -> request, // TODO pass in the args of the session rather than the object, once it will be implemented in Play
       "session" -> request.session.data.asJava,
       "flash" -> request.flash.data.asJava,
