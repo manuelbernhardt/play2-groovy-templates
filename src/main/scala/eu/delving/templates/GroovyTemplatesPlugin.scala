@@ -3,10 +3,13 @@ package eu.delving.templates
 import _root_.java.util.ArrayList
 import _root_.java.util.concurrent.ConcurrentHashMap
 import play.api._
+import play.api.Play.current
 import org.reflections._
 import _root_.scala.collection.JavaConverters._
 import collection.mutable.HashMap
 import play.templates.{GenericTemplateLoader, TemplateEngine}
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor
+
 /**
  * Plugin for rendering Groovy templates
  *
@@ -16,6 +19,8 @@ import play.templates.{GenericTemplateLoader, TemplateEngine}
 class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   override def enabled = true
+
+  val compressor = new HtmlCompressor()
 
   var engine: TemplateEngine = null
 
@@ -645,7 +650,13 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
       val templateArgs = new ConcurrentHashMap[String, AnyRef](args.map(e => (e._1, e._2.asInstanceOf[AnyRef])).asJava)
       val res = template.render(templateArgs)
       Logger("play").debug("Rendered template %s in %s".format(name, System.currentTimeMillis() - n))
-      Right(res)
+      val result = if(Play.isProd && app.configuration.getBoolean("play.groovyTemplates.htmlCompression").getOrElse(true)) {
+        compressor.compress(res)
+      } else {
+        res
+      }
+
+      Right(result)
     } catch {
       case t: Throwable =>
         engine.handleException(t)
