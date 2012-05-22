@@ -650,7 +650,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
       val templateArgs = new ConcurrentHashMap[String, AnyRef](args.map(e => (e._1, e._2.asInstanceOf[AnyRef])).asJava)
       val res = template.render(templateArgs)
       Logger("play").debug("Rendered template %s in %s".format(name, System.currentTimeMillis() - n))
-      val result = if(Play.isProd && app.configuration.getBoolean("play.groovyTemplates.htmlCompression").getOrElse(true)) {
+      val result = if(Play.isProd && app.configuration.getBoolean("play.groovyTemplates.htmlCompression").getOrElse(true) && name.endsWith("html")) {
         compressor.compress(res)
       } else {
         res
