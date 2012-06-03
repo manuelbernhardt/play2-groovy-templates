@@ -16,8 +16,12 @@ class Play2TemplateUtils extends TemplateUtils {
 
   lazy val rootTemplatePaths = {
     val modules = Play2VirtualFile.fromPath("/modules")
-    val moduleRoots: List[String] = if(modules.isDirectory) modules.realFile.get.listFiles().filter(_.isDirectory).map("/modules/" + _.getName + "/app/views/").toList else List.empty
-    Seq("/app/views/") ++ moduleRoots
+    val moduleRoots: List[String] = if(modules.isDirectory) {
+      modules.realFile.get.listFiles().filter(_.isDirectory).map("/modules/" + _.getName + "/app/views/").toList
+    } else {
+      List.empty
+    }
+    Seq("/app/views/") ++ moduleRoots ++ Seq("/views")
   }
 
   lazy val log = Logger("play")
@@ -49,11 +53,15 @@ class Play2TemplateUtils extends TemplateUtils {
   def usePrecompiled() = Play.isProd
 
   def findTemplateWithPath(path: String): Play2VirtualFile = {
-    for (p <- rootTemplatePaths) {
-      val t = Play2VirtualFile.fromPath(p + path)
-      if(t.exists) return t
+    if(isDevMode) {
+      for (p <- rootTemplatePaths) {
+        val t = Play2VirtualFile.fromPath(p + path)
+        if(t.exists) return t
+      }
+      Play2VirtualFile.fromPath("/app/views/" + path)
+    } else {
+      Play2VirtualFile.fromPath("templates/" + (if(path.startsWith("/")) path.drop(1) else path))
     }
-    Play2VirtualFile.fromPath("/app/views/" + path)
   }
 
   def findFileWithPath(path: String): Play2VirtualFile = {
@@ -63,11 +71,7 @@ class Play2TemplateUtils extends TemplateUtils {
   }
 
   def list(parent: PlayVirtualFile) = {
-    val r = new ArrayList[PlayVirtualFile]
-    if (parent.exists()) {
-      r.addAll(parent.asInstanceOf[Play2VirtualFile].list())
-    }
-    r
+    new ArrayList[PlayVirtualFile]
   }
 
   def encodeBASE64(p1: Array[Byte]) = new sun.misc.BASE64Encoder().encode(p1)

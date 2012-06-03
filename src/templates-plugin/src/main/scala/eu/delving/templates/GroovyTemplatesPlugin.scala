@@ -9,6 +9,7 @@ import _root_.scala.collection.JavaConverters._
 import collection.mutable.HashMap
 import play.templates.{GenericTemplateLoader, TemplateEngine}
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
+import play.templates.exceptions.TemplateCompilationException
 
 /**
  * Plugin for rendering Groovy templates
@@ -34,7 +35,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   override def onStart {
     engine = new Play2TemplateEngine
     engine.startup()
-    
+
     // cache lookup of classes
     // the template engine needs this to allow static access to classes with "nice" names (without the $'s)
     // we also use this to find FastTag-s and JavaExtension-s, assuming they live in "views"
@@ -50,10 +51,33 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
     if(TemplateEngine.utils.usePrecompiled()) {
       Logger("play").info("Precompiling...")
+
+      val templatesList: TemplatesList = try {
+          app.classloader.loadClass("eu.delving.templates.GroovyTemplatesList$").getDeclaredField("MODULE$").get(null).asInstanceOf[TemplatesList]
+        } catch {
+          case e =>
+            Logger("play").error("Could not find list of templates. Did you add the groovyTemplatesList key to the sourceGenerators in your SBT build?")
+          throw e
+        }
+
       try {
-        GenericTemplateLoader.getAllTemplate
+        templatesList.templates.map {
+          template => {
+            val loaded = GenericTemplateLoader.load(template)
+            if (loaded != null) {
+              try {
+                  loaded.compile();
+              } catch {
+                case tce: TemplateCompilationException => {
+                  TemplateEngine.utils.logError("Template %s does not compile at line %d", tce.getTemplate().name, tce.getLineNumber());
+                  throw tce
+                }
+              }
+            }
+          }
+        }
       } catch {
-        case t => TemplateEngine.engine.handleException(t);
+        case t => TemplateEngine.engine.handleException(t)
       }
     }
 
@@ -83,8 +107,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   // however the reason for it seems a little obscure, so we'll just take in the bare minimum necessary for things to work nicely
   def getAllClasses = {
     if(allClassesCache.isEmpty) {
-      val classes = allClassesMetadata.getStore.get(classOf[AllTypesScanner]).keySet()
-      val toLoad = classes.asScala.filter(c => Seq(
+      val toLoad = Seq(
 "scala.Array$",
 "scala.Array$$anon$2",
 "scala.Console$",
@@ -626,7 +649,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 "xsbti.Reboot",
 "xsbti.Repository",
 "xsbti.RetrieveException",
-"xsbti.ScalaProvider").contains(c)).toList //.foldLeft(false) { (result, folded) => result || c.startsWith(folded) } ).toList
+"xsbti.ScalaProvider")
 
       Logger("play").debug("Loading %s classes".format(toLoad.size))
       for (c <- toLoad) {

@@ -18,9 +18,31 @@ object PluginBuild extends Build {
     "com.yahoo.platform.yui"         %  "yuicompressor"                % "2.4.6"
   )
 
-  val main = Project(
+  lazy val root = Project(
+    id = "root",
+    base = file(".")
+  ) aggregate(templatesSbtPlugin, main)
+
+  lazy val templatesSbtPlugin = Project(
+    id="groovy-templates-sbt-plugin",
+    base=file("src/sbt-plugin")
+  ).settings(
+    sbtPlugin := true,
+
+    organization := "eu.delving",
+
+    version := buildVersion,
+
+    publishTo := Some(delvingRepository),
+
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+
+    publishMavenStyle := false
+  )
+
+  lazy val main = Project(
     id = "groovy-templates-plugin",
-    base = file(".")).settings(
+    base = file("src/templates-plugin")).settings(
       organization := "eu.delving",
 
       version := buildVersion,
@@ -37,7 +59,7 @@ object PluginBuild extends Build {
 
       credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
 
-      publishMavenStyle := true
-    )
+      publishMavenStyle := false
+    ).dependsOn(templatesSbtPlugin)
 
 }
