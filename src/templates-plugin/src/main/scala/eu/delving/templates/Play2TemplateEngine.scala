@@ -58,8 +58,6 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def getTemplateCompiler = new Play2GroovyTemplateCompiler
 
-  def getTemplatePaths = Buffer(Play2VirtualFile.fromPath("app/views")).asJava
-
   def handleActionInvocation(controller: String, name: String, param: AnyRef, absolute: Boolean, template: ExecutableTemplate) = throw new RuntimeException("not implemented")
 
   def reverseWithCheck(action: String, absolute: Boolean) = throw new RuntimeException("not implemented")

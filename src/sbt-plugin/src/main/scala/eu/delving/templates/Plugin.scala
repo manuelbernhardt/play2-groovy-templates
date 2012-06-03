@@ -59,9 +59,6 @@ object Plugin extends sbt.Plugin {
     groovyTemplatesList <<= (baseDirectory, sourceManaged in Compile) map {
       (source, target) => Seq(TemplatePaths(source, target).templateList)
     },
-//    copyResources in Compile <++= (baseDirectory, sourceManaged in Compile, classDirectory in Compile) map {
-//      (source, target, classTarget) => TemplatePaths(source, target).templates.map(t => (t -> new java.io.File(classTarget, t.getName)))
-//    },
     mappings in(Compile, packageBin) <++=
       (baseDirectory, sourceManaged in Compile, classDirectory in Compile) map {
         (source, target, classTarget) => TemplatePaths(source, target).templates.map(t =>

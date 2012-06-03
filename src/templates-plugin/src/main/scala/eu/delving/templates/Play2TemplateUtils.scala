@@ -70,10 +70,6 @@ class Play2TemplateUtils extends TemplateUtils {
     if (f.exists()) Play2VirtualFile.fromFile(f) else null
   }
 
-  def list(parent: PlayVirtualFile) = {
-    new ArrayList[PlayVirtualFile]
-  }
-
   def encodeBASE64(p1: Array[Byte]) = new sun.misc.BASE64Encoder().encode(p1)
 
   def decodeBASE64(p1: String) = new sun.misc.BASE64Decoder().decodeBuffer(p1)

@@ -11,7 +11,7 @@ object PluginBuild extends Build {
 
   val dependencies = Seq(
     "play"                           %% "play"                         % "2.0",
-    "eu.delving"                     %  "groovy-templates-engine"      % "0.6",
+    "eu.delving"                     %  "groovy-templates-engine"      % "0.7",
     "commons-io"                     %  "commons-io"                   % "2.0",
     "com.googlecode.htmlcompressor"  %  "htmlcompressor"               % "1.5.2",
     "com.google.javascript"          %  "closure-compiler"             % "r1043",
