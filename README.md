@@ -12,6 +12,11 @@ In order to use the plugin, make sure you have these dependencies / resolvers in
 
 ## Changelog
 
+### 1.2 - 4.06.2012
+
+- compressing HTML in PROD mode
+- support for absolute routes
+
 ### 1.1 - 21.03.2012
 
 - fixing issue with access to language, messages and render args
