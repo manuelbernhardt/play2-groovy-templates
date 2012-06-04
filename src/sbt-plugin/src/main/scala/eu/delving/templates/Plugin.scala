@@ -59,15 +59,18 @@ object Plugin extends sbt.Plugin {
     groovyTemplatesList <<= (baseDirectory, sourceManaged in Compile) map {
       (source, target) => Seq(TemplatePaths(source, target).templateList)
     },
-    mappings in(Compile, packageBin) <++=
-      (baseDirectory, sourceManaged in Compile, classDirectory in Compile) map {
-        (source, target, classTarget) => TemplatePaths(source, target).templates.map(t =>
-          (t -> {
-            "templates/" + (t.getAbsolutePath.substring(source.getAbsolutePath.length + 1).split("app/views/").reverse.head)
-          })
-        )
-      }
+    copyTemplates <<= copyTemplatesTask,
+    copyResources in Compile <<= (copyResources in Compile, copyTemplates) map { (r, pr) => r ++ pr }
   )
+
+  val copyTemplates = TaskKey[Seq[(File, File)]]("copy-templates")
+  def copyTemplatesTask =
+	(baseDirectory, classDirectory in Compile, cacheDirectory, resources in Compile, resourceDirectories in Compile, streams) map { (source, target, cache, resrcs, dirs, s) =>
+		val cacheFile = cache / "copy-templates"
+		val mappings: Seq[(File, File)] = TemplatePaths(source, target).templates.map(t => (t -> new java.io.File(target, "templates/" + (t.getAbsolutePath.substring(source.getAbsolutePath.length + 1).split("app/views/").reverse.head))))
+		Sync(cacheFile)( mappings )
+		mappings
+	}
 
 
 }
