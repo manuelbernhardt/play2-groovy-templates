@@ -37,7 +37,7 @@ object PluginBuild extends Build {
 
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
 
-    publishMavenStyle := false
+    publishMavenStyle := true
   )
 
   lazy val main = Project(
@@ -59,7 +59,7 @@ object PluginBuild extends Build {
 
       credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
 
-      publishMavenStyle := false
+      publishMavenStyle := true
     ).dependsOn(templatesSbtPlugin)
 
 }
