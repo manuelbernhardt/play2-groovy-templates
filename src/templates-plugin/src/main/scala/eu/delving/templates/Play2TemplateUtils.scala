@@ -48,7 +48,7 @@ class Play2TemplateUtils extends TemplateUtils {
     }
   }
 
-  def isDevMode = Play.isDev
+  def isDevMode = Play.isDev || Play.isTest
 
   def usePrecompiled() = Play.isProd
 
