@@ -25,18 +25,17 @@ object Plugin extends sbt.Plugin {
       Seq("/app/views/") ++ moduleRoots
     }
     val templateNames = rootTemplatePaths.map {
-      root =>
-        ((sourceDir / root) ** "*.html").
-          get.
-          filterNot(_.getName.endsWith("scala.html")).
-          map(_.getAbsolutePath.substring((sourceDir / root).getAbsolutePath.length + 1))
+      root => {
+        val htmlTemplates = ((sourceDir / root) ** "*.html").get.filterNot(_.getName.endsWith("scala.html"))
+        val txtTemplates = ((sourceDir / root) ** "*.txt").get.filterNot(_.getName.endsWith("scala.txt"))
+        (htmlTemplates ++ txtTemplates).map(_.getAbsolutePath.substring((sourceDir / root).getAbsolutePath.length + 1))
+      }
     }.flatten
 
     val templates = rootTemplatePaths.map {
       root =>
-        ((sourceDir / root) ** "*.html").
-          get.
-          filterNot(_.getName.endsWith("scala.html"))
+        (((sourceDir / root) ** "*.html").get ++ ((sourceDir / root) ** "*.txt").get).
+          filterNot(_.getName.contains(".scala."))
     }.flatten
 
 
