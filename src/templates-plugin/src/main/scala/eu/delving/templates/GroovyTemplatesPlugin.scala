@@ -22,6 +22,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   override def enabled = true
 
   val compressor = new HtmlCompressor()
+  compressor.setRemoveComments(false)
 
   var engine: TemplateEngine = null
 
