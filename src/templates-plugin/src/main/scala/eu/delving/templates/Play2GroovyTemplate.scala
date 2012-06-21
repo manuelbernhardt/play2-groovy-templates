@@ -90,13 +90,13 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
               None,
               None,
               Some(fileName),
-              Some(Path(Play.getFile(fileName)))
+              Play.resource(fileName).map(Path(_.toURI))
             )
           }
         }
-        throw new RuntimeException(e);
+        throw new RuntimeException(e)
     } catch {
-      case t => TemplateEngine.engine.handleException(t);
+      case t => TemplateEngine.engine.handleException(t)
     }
   }
 }
