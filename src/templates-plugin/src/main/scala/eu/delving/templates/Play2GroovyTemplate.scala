@@ -1,6 +1,7 @@
 package eu.delving.templates
 
 import _root_.java.io.File
+import _root_.java.net.URL
 import play.exceptions.TagInternalException
 import play.api.Play
 import play.api.Play.current
@@ -90,7 +91,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
               None,
               None,
               Some(fileName),
-              Play.resource(fileName).map(Path(_.toURI))
+              Play.resource(fileName).flatMap(r => Path(r.toURI))
             )
           }
         }
