@@ -4,13 +4,40 @@ Groovy template mechanism for Play! 2, to make the migration between Play 1 and 
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.1"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.3"`
 - resolvers:
   - `"Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"`
   - `"Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"`
 
 
+In order for pre-compilation to work correctly in PROD mode, you need to hook the groovy templates plugin in the `sourceGenerators` of your build, for example:
+
+    val main = PlayProject(appName, appVersion, appDependencies, settings = Defaults.defaultSettings ++ groovyTemplatesSettings).settings(
+
+      sourceGenerators in Compile <+= groovyTemplatesList,
+    
+    )
+
+And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
+
+    resolvers ++= Seq(
+        "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public",
+        "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots",
+    )
+    
+    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.3")
+
+
+(note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
+
+
 ## Changelog
+
+### 1.3 - 25.06.2012
+
+- Depending on Play 2.0.1
+- support for Play 2.0 stage / dist mode: no longer looking up files on disk in PROD, instead relying on the classpath. This is a breaking change in that it is necessary to add a SBT plugin to the build in order for pre-compilation to work.
+- preserving HTML comments in PROD mode: this is necessary for e.g. libraries such as KnockoutJS (will be made configurable)
 
 ### 1.2 - 4.06.2012
 
