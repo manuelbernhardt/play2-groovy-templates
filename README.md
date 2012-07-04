@@ -33,6 +33,11 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
 ## Changelog
 
+### 1.4 - 4.07.2012
+
+- Upgrade to Play 2.0.2
+- Upgrade to SBT 0.11.3
+
 ### 1.3 - 25.06.2012
 
 - Depending on Play 2.0.1
