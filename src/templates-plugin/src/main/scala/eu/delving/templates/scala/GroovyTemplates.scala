@@ -10,6 +10,7 @@ import play.templates.{TemplateEngine, TemplateEngineException}
 import eu.delving.templates.exceptions.TemplateNotFoundException
 import eu.delving.templates.GroovyTemplatesPlugin
 import play.api.i18n.{Lang, Messages}
+import com.google.common.cache.{Cache, CacheLoader, CacheBuilder}
 
 /**
  * Helper methods for backwards-compatible behavior of Groovy templates
@@ -27,11 +28,19 @@ trait GroovyTemplates {
 
   protected val __RESPONSE_ENCODING: String = "__RESPONSE_ENCODING"
 
-  implicit def richRenderArgs(x: RenderArgs): RichRenderArgs = new RichRenderArgs(x)
+  /**
+   * This cache holds the render arguments for the current template, from the moment an action is invoked for a given request to the moment the template
+   * has been rendered. We need this mechanism in order to emulate the mutable renderArgs that exist in Play 1. The cache uses weakly referenced keys by
+   * default.
+   */
+  private val requestRenderArgs: Cache[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] = CacheBuilder.newBuilder().build(
+    new CacheLoader[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] {
+      def load(key: RequestHeader): scala.collection.mutable.HashMap[String, AnyRef] = new scala.collection.mutable.HashMap[String, AnyRef]()
+  })
 
-  implicit def renderArgs()(implicit request: RequestHeader) = RenderArgs.renderArgs(request)
+  implicit def renderArgs()(implicit request: RequestHeader): scala.collection.mutable.HashMap[String, AnyRef] = requestRenderArgs.get(request)
 
-  implicit def renderArgs(key: String)(implicit request: RequestHeader) = RenderArgs.renderArgs(request)(key)
+  implicit def renderArgs(key: String)(implicit request: RequestHeader) = requestRenderArgs.get(request).get(key)
 
   private def className = {
     val name = getClass.getName
@@ -87,7 +96,7 @@ trait GroovyTemplates {
   }
 
   private def cleanup(request: RequestHeader) {
-    RenderArgs.cleanup(request)
+    requestRenderArgs.invalidate(request)
   }
 
   private def renderGroovyTemplate(name: Option[String], args: Seq[(Symbol, Any)])(implicit request: RequestHeader, currentMethod: ThreadLocal[String]): GroovyTemplateContent = {
@@ -115,7 +124,7 @@ trait GroovyTemplates {
     }
 
     val callArgs = args.map(e => (e._1.name, e._2)).toMap
-    val renderArguments = renderArgs.data.asScala.toMap
+    val renderArguments = renderArgs.toMap
 
     val contextArgs = callArgs ++ renderArguments
 
@@ -161,20 +170,3 @@ class WrappedMessages(language: String) {
 }
 
 case class GroovyTemplateContent(body: String, contentType: String) extends Content
-
-private[scala] class RichRenderArgs(val renderArgs: RenderArgs) {
-
-  def +=(variable: Tuple2[String, Any]) = {
-    renderArgs.put(variable._1, variable._2)
-    this
-  }
-
-  def get(key: String, clazz: Class[_]) = renderArgs.get(key, clazz)
-
-  def apply(key: String) = {
-    renderArgs.data.containsKey(key) match {
-      case true => Some(renderArgs.get(key))
-      case false => None
-    }
-  }
-}
