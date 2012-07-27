@@ -47,7 +47,11 @@ object Plugin extends sbt.Plugin {
           |object GroovyTemplatesList extends TemplatesList {
           |  def templates = Seq("%s")
           |}
-        """.stripMargin.format(templateNames.mkString("""", """"))
+        """.stripMargin.format(
+          templateNames.
+            map(path => path.replaceAll("""\""", """\\""")). // Windows
+            mkString("""", """")
+        )
       IO.write(f, templatesListCode)
       f
     }
