@@ -32,7 +32,6 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
   var allClassesCache = new ArrayList[Class[_]]
 
-
   override def onStart {
     engine = new Play2TemplateEngine
     engine.startup()
@@ -53,16 +52,8 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     if(TemplateEngine.utils.usePrecompiled()) {
       Logger("play").info("Precompiling...")
 
-      val templatesList: TemplatesList = try {
-          app.classloader.loadClass("eu.delving.templates.GroovyTemplatesList$").getDeclaredField("MODULE$").get(null).asInstanceOf[TemplatesList]
-        } catch {
-          case e =>
-            Logger("play").error("Could not find list of templates. Did you add the groovyTemplatesList key to the sourceGenerators in your SBT build?")
-          throw e
-        }
-
       try {
-        templatesList.templates.map {
+        engine.asInstanceOf[Play2TemplateEngine].templatesList.templates.map {
           template => {
             val loaded = GenericTemplateLoader.load(template)
             if (loaded != null) {

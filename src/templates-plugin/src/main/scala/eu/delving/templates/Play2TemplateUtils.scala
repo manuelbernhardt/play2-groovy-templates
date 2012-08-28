@@ -10,18 +10,13 @@ import _root_.scala.collection.JavaConversions.asJavaCollection
 import play.cache.Cache
 import _root_.java.io._
 import _root_.java.util.ArrayList
-import play.templates.{PlayVirtualFile, TemplateUtils}
+import play.templates.{PlayVirtualFile, TemplateUtils, TemplateEngine}
 
 class Play2TemplateUtils extends TemplateUtils {
 
   lazy val rootTemplatePaths = {
-    val modules = Play2VirtualFile.fromPath("/modules")
-    val moduleRoots: List[String] = if(modules.isDirectory) {
-      modules.realFile.get.listFiles().filter(_.isDirectory).map("/modules/" + _.getName + "/app/views/").toList
-    } else {
-      List.empty
-    }
-    Seq("/app/views/") ++ moduleRoots ++ Seq("/views")
+    val dependencyRoots = TemplateEngine.engine.asInstanceOf[Play2TemplateEngine].templatesList.templateRoots
+    Seq("/app/views/") ++ dependencyRoots ++ Seq("/views")
   }
 
   lazy val log = Logger("play")

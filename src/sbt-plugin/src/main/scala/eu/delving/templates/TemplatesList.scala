@@ -9,4 +9,6 @@ trait TemplatesList {
 
   def templates: Seq[String]
 
+  def templateRoots: Seq[String]
+
 }

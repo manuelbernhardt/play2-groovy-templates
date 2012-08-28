@@ -33,6 +33,10 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
 ## Changelog
 
+### 1.5.2 - 28.08.2012
+
+- using SBT project build dependency graph in order to discover templates instead of the hardcoded lookup in "modules"
+
 ### 1.5.1 - 08.08.2012
 
 - fixing memory leak: for controllers mixing in the GroovyTemplates trait but never calling Template, render arguments were never flushed 

@@ -4,6 +4,7 @@ import _root_.java.io.File
 import _root_.java.util.ArrayList
 import exceptions.TemplateNotFoundException
 import play.api._
+import play.api.Play.current
 import cache.Cache
 import play.templates.GroovyTemplate.ExecutableTemplate
 import collection.mutable.Buffer
@@ -18,6 +19,14 @@ import play.templates._
  */
 
 class Play2TemplateEngine extends TemplateEngine {
+
+  lazy val templatesList: TemplatesList = try {
+      current.classloader.loadClass("eu.delving.templates.GroovyTemplatesList$").getDeclaredField("MODULE$").get(null).asInstanceOf[TemplatesList]
+    } catch {
+      case e =>
+        Logger("play").error("Could not find list of templates. Did you add the groovyTemplatesList key to the sourceGenerators in your SBT build?")
+      throw e
+    }
 
   override def startup() {
     super.startup()
