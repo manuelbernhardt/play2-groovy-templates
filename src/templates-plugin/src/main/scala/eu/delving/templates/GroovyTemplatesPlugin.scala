@@ -19,7 +19,7 @@ import play.templates.exceptions.TemplateCompilationException
 
 class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
-  override def enabled = true
+  override def enabled = app.configuration.getBoolean("play.groovyTemplates.enabled").getOrElse(true)
 
   val compressor = new HtmlCompressor()
   compressor.setRemoveComments(false)

@@ -3,7 +3,7 @@ import Keys._
 
 object PluginBuild extends Build {
 
-  val buildVersion = "1.5.2"
+  val buildVersion = "1.5.3-SNAPSHOT"
 
   val delvingReleases = "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/repositories/releases"
   val delvingSnapshots = "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"
