@@ -44,7 +44,7 @@ trait GroovyTemplates {
   implicit def renderArgs(key: String)(implicit request: RequestHeader) = requestRenderArgs.get(request).get(key)
 
   private def className = {
-    val name = getClass.getName
+    val name = this.getClass.getName
     if (name.endsWith("$")) name.substring(0, name.length() - 1) else name
   }
 
@@ -56,7 +56,7 @@ trait GroovyTemplates {
 
   def Template(implicit request: RequestHeader) = {
     try {
-      setContext(request)
+      setContext()
       renderGroovyTemplate(None, Seq())
     } finally {
       cleanup(request)
@@ -65,7 +65,7 @@ trait GroovyTemplates {
 
   def Template(args: (Symbol, Any)*)(implicit request: RequestHeader) = {
     try {
-      setContext(request)
+      setContext()
       renderGroovyTemplate(None, args)
     } finally {
       cleanup(request)
@@ -74,7 +74,7 @@ trait GroovyTemplates {
 
   def Template(name: String, args: (Symbol, Any)*)(implicit request: RequestHeader) = {
     try {
-      setContext(request)
+      setContext(false)
       renderGroovyTemplate(Some(name), args)
     } finally {
       cleanup(request)
@@ -83,16 +83,17 @@ trait GroovyTemplates {
 
   private val methodNameExtractor = """\$anonfun\$([^\$]*)(.*)""".r
 
-  private def setContext(implicit request: RequestHeader) {
+  private def setContext(currentMethodLookup: Boolean = true)(implicit request: RequestHeader) {
 
-    // current method
-    val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(getClass.getName + "$anonfun$"))
-    val trace = methodCandidates.headOption.getOrElse(throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not find current method in execution call", null))
-    val name: Option[String] = methodNameExtractor.findFirstMatchIn(trace.getClassName.substring(getClass.getName.length())).map(_.group(1))
-    if (name.isDefined)
-      currentMethod.set(name.get)
-    else
-      new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not figure out current method name in execution call", null)
+    if (currentMethodLookup) {
+      val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(this.getClass.getName + "$anonfun$"))
+      val trace = methodCandidates.headOption.getOrElse(throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not find current method in execution call", null))
+      val name: Option[String] = methodNameExtractor.findFirstMatchIn(trace.getClassName.substring(this.getClass.getName.length())).map(_.group(1))
+      if (name.isDefined)
+        currentMethod.set(name.get)
+      else
+        new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not figure out current method name in execution call", null)
+    }
 
   }
 
