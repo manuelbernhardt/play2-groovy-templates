@@ -4,7 +4,7 @@ Groovy template mechanism for Play! 2, to make the migration between Play 1 and 
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.5.3"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.5.4"`
 - resolvers:
   - `"Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"`
   - `"Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"`
@@ -27,7 +27,7 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
         "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots",
     )
     
-    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.5.3")
+    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.5.4")
 
 
 (note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
@@ -80,6 +80,11 @@ The following settings (in `application.conf` or whever you application's config
 - `play.groovyTemplates.htmlCompression`: activates HTML compression of rendered templates (default: `true`)
 
 ## Changelog
+
+### 1.5.4 - 2.11.2012
+
+- only attempting to compute current execution method if no template name is passed
+- Play 2.0.4
 
 ### 1.5.3 - 24.10.2012
 
