@@ -9,7 +9,7 @@ import play.libs.Scala;
 import play.mvc.Controller;
 import play.templates.PlayVirtualFile;
 import play.templates.TemplateEngine;
-import scala.Either;
+import scala.util.Either;
 
 import java.util.HashMap;
 import java.util.Map;

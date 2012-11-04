@@ -69,7 +69,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
           }
         }
       } catch {
-        case t => TemplateEngine.engine.handleException(t)
+        case t: Throwable => TemplateEngine.engine.handleException(t)
       }
     }
 
@@ -648,7 +648,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
         try {
           allClassesCache.add(app.classloader.loadClass(c))
         } catch {
-          case t => // we don't care
+          case t: Throwable => // we don't care
         }
       }
     }

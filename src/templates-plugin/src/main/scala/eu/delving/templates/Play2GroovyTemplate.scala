@@ -97,7 +97,7 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
         }
         throw new RuntimeException(e)
     } catch {
-      case t => TemplateEngine.engine.handleException(t)
+      case t: Throwable => TemplateEngine.engine.handleException(t)
     }
   }
 }

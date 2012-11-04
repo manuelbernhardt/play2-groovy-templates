@@ -10,7 +10,7 @@ import play.templates.{TemplateEngine, TemplateEngineException}
 import eu.delving.templates.exceptions.TemplateNotFoundException
 import eu.delving.templates.GroovyTemplatesPlugin
 import play.api.i18n.{Lang, Messages}
-import com.google.common.cache.{Cache, CacheLoader, CacheBuilder}
+import com.google.common.cache.{LoadingCache, CacheLoader, CacheBuilder}
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,10 +34,12 @@ trait GroovyTemplates {
    * has been rendered. We need this mechanism in order to emulate the mutable renderArgs that exist in Play 1. The cache uses weakly referenced keys by
    * default.
    */
-  private val requestRenderArgs: Cache[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build(
-    new CacheLoader[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] {
-      def load(key: RequestHeader): scala.collection.mutable.HashMap[String, AnyRef] = new scala.collection.mutable.HashMap[String, AnyRef]()
-  })
+  private val requestRenderArgs: LoadingCache[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] = {
+    val loader = new CacheLoader[RequestHeader, scala.collection.mutable.HashMap[String, AnyRef]] {
+        def load(key: RequestHeader): scala.collection.mutable.HashMap[String, AnyRef] = new scala.collection.mutable.HashMap[String, AnyRef]()
+    }
+    CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build(loader)
+  }
 
   implicit def renderArgs()(implicit request: RequestHeader): scala.collection.mutable.HashMap[String, AnyRef] = requestRenderArgs.get(request)
 
