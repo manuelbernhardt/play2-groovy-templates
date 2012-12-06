@@ -2,6 +2,11 @@
 
 Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1.
 
+More information and documentation about the template engine can be found here:
+
+- http://www.playframework.org/documentation/1.2.5/templates
+- http://www.playframework.org/documentation/1.2.5/tags
+
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
 - dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.5.4"`
