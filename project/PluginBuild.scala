@@ -29,7 +29,7 @@ object PluginBuild extends Build {
     base = file(".")
   ).settings(
     publish := { },
-    scalaVersion := "2.10.0-RC1"
+    scalaVersion := "2.10.0"
   ).aggregate(templatesSbtPlugin, main)
 
   lazy val main = Project(
@@ -39,9 +39,9 @@ object PluginBuild extends Build {
 
       version := buildVersion,
 
-      scalaVersion := "2.10.0-RC1",
+      scalaVersion := "2.10.0",
 
-      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0-RC1"),
+      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
 
       resolvers += "jahia" at "http://maven.jahia.org/maven2",
 
@@ -66,8 +66,8 @@ object PluginBuild extends Build {
     ).settings(
       sbtPlugin := true,
 
-      scalaVersion := "2.9.2",
-      scalaBinaryVersion  := CrossVersion.binaryScalaVersion("2.9.2"),
+      scalaVersion := "2.10.0",
+      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
 
       organization := "eu.delving",
 
