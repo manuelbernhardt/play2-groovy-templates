@@ -2,7 +2,7 @@ package eu.delving.templates
 
 import _root_.java.io.File
 import _root_.java.util.ArrayList
-import exceptions.TemplateNotFoundException
+import exceptions.{TemplateCompilationException, TemplateNotFoundException}
 import play.api._
 import play.api.Play.current
 import cache.Cache
@@ -46,12 +46,12 @@ class Play2TemplateEngine extends TemplateEngine {
   def handleException(t: Throwable) {
     t match {
       case notFound if t.isInstanceOf[TemplateNotFoundException] => new PlayException("Template not found", "The template could not be found", t)
-      case compilation if t.isInstanceOf[play.templates.TemplateCompilationError] => {
-        val e = t.asInstanceOf[play.templates.TemplateCompilationError]
+      case compilation if t.isInstanceOf[TemplateCompilationException] => {
+        val e = t.asInstanceOf[TemplateCompilationException]
         if (TemplateEngine.utils.usePrecompiled()) {
-          Logger("play").error("Could not compile template %s at line %s: %s".format(e.source.getName, e.line, e.getMessage))
+          Logger("play").error("Could not compile template %s at line %s: %s".format(e.sourceName, e.line, e.getMessage))
         }
-        throw new eu.delving.templates.exceptions.TemplateCompilationException(e.getMessage, Some(e.line), None, Some(e.source), Some(e.source.getName), None)
+        throw e
       }
       case t@_ => throw t
     }

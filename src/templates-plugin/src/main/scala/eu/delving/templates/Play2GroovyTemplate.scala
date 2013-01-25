@@ -2,12 +2,13 @@ package eu.delving.templates
 
 import _root_.java.io.File
 import _root_.java.net.URL
+import exceptions.TemplateCompilationException
 import play.exceptions.TagInternalException
 import play.api.Play
 import play.api.Play.current
 import scalax.file.Path
 import play.templates.TemplateEngineException.ExceptionType._
-import play.templates.{TemplateEngine, TemplateCompilationError, TemplateEngineException, GroovyTemplate}
+import play.templates.{TemplateEngine, TemplateEngineException, GroovyTemplate}
 import play.templates.exceptions.TemplateExecutionException
 
 class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(name, source) {
@@ -39,8 +40,8 @@ class Play2GroovyTemplate(name: String, source: String) extends GroovyTemplate(n
             if (cName.equals(compiledTemplateName) || cName.startsWith(compiledTemplateName + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber)) {
                     throw new TemplateExecutionException.DoBodyException(e)
-                } else if(e.isInstanceOf[TemplateCompilationError]) {
-                  throw cleanStackTrace(e).asInstanceOf[TemplateCompilationError]
+                } else if(e.isInstanceOf[TemplateCompilationException]) {
+                  throw cleanStackTrace(e).asInstanceOf[TemplateCompilationException]
                 } else if (e.isInstanceOf[TagInternalException]) {
                     throw cleanStackTrace(e).asInstanceOf[TagInternalException]
                 } else if (e.isInstanceOf[TemplateExecutionException]) {

@@ -14,7 +14,6 @@ object PluginBuild extends Build {
     "play"                           %% "play"                         % "2.1-SNAPSHOT",
     "play"                           %% "play-java"                    % "2.1-SNAPSHOT",
     "play"                           %% "templates"                    % "2.1-SNAPSHOT",
-    "play"                           %  "templates-compiler_2.9.2"     % "2.1-SNAPSHOT",
     "eu.delving"                     %  "groovy-templates-engine"      % "0.7.1",
     "commons-io"                     %  "commons-io"                   % "2.0",
     "com.googlecode.htmlcompressor"  %  "htmlcompressor"               % "1.5.2",
