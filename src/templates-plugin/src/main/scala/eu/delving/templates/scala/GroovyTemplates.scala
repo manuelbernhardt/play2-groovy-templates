@@ -142,7 +142,7 @@ trait GroovyTemplates {
       "request" -> request, // TODO pass in the args of the session rather than the object, once it will be implemented in Play
       "session" -> request.session.data.asJava,
       "flash" -> request.flash.data.asJava,
-      "params" -> request.queryString.asJava, // TODO not sure if we shouldn't call this one "queryString" instead
+      "params" -> request.queryString.map(m => (m._1 -> m._2.asJava)).toMap.asJava,
       "messages" -> new WrappedMessages(language),
       "lang" -> language
 
