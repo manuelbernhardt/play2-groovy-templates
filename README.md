@@ -81,6 +81,12 @@ The following settings (in `application.conf` or whever you application's config
 
 ## Changelog
 
+### 1.6.0-SNAPSHOT - 4.02.2013
+
+- Play 2.1-SNAPSHOT
+- Scala 2.10.0
+- Breaking change: fixing a conversion issue with the `params` variable in the view which was causing them to be passed in as Scala Buffer instead of Java ArrayList
+
 ### 1.5.4 - 2.11.2012
 
 - only attempting to compute current execution method if no template name is passed

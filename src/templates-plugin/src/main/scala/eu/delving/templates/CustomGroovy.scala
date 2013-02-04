@@ -40,25 +40,29 @@ object CustomGroovy {
                 }
             }
 
-            scala.Some.metaClass.toString = { ->
-                delegate.get().toString()
-            }
+// we have to comment these out for the time being
+// because there appears to be something strange with regards to how these Scala classes
+// answer to getInterfaces() and getGenericInterfaces()
 
-            scala.None.metaClass.toString = { ->
-                null
-            }
+//            scala.Some.metaClass.toString = { ->
+//                delegate.get().toString()
+//            }
+//
+//            scala.None.metaClass.toString = { ->
+//                null
+//            }
 
-            scala.Option.metaClass.asBoolean = { ->
-                delegate.isDefined()
-            }
-
-            scala.collection.Seq.metaClass.asBoolean = { ->
-                delegate.size() > 0
-            }
-
-            scala.collection.Seq.metaClass.getAt = { i ->
-                delegate.apply(i)
-            }
+//            scala.Option.metaClass.asBoolean = { ->
+//                delegate.isDefined()
+//            }
+//
+//            scala.collection.Seq.metaClass.asBoolean = { ->
+//                delegate.size() > 0
+//            }
+//
+//            scala.collection.Seq.metaClass.getAt = { i ->
+//                delegate.apply(i)
+//            }
 
         """)
     }
