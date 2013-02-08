@@ -11,9 +11,9 @@ object PluginBuild extends Build {
   val delvingRepository = if(buildVersion.endsWith("SNAPSHOT")) delvingSnapshots else delvingReleases
 
   val dependencies = Seq(
-    "play"                           %% "play"                         % "2.1-SNAPSHOT",
-    "play"                           %% "play-java"                    % "2.1-SNAPSHOT",
-    "play"                           %% "templates"                    % "2.1-SNAPSHOT",
+    "play"                           %% "play"                         % "2.1.0",
+    "play"                           %% "play-java"                    % "2.1.0",
+    "play"                           %% "templates"                    % "2.1.0",
     "eu.delving"                     %  "groovy-templates-engine"      % "0.7.5",
     "commons-io"                     %  "commons-io"                   % "2.0",
     "com.googlecode.htmlcompressor"  %  "htmlcompressor"               % "1.5.2",
@@ -43,12 +43,11 @@ object PluginBuild extends Build {
 
       scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
 
-      resolvers += "jahia" at "http://maven.jahia.org/maven2",
-
       resolvers += delvingReleases,
 
       resolvers += delvingSnapshots,
-
+      
+      resolvers += "Typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
       resolvers += Resolver.file("local-ivy-repo", file(Path.userHome + "/.ivy2/local"))(Resolver.ivyStylePatterns),
 
       libraryDependencies ++= dependencies,
@@ -65,9 +64,6 @@ object PluginBuild extends Build {
       base=file("src/sbt-plugin")
     ).settings(
       sbtPlugin := true,
-
-      scalaVersion := "2.10.0",
-      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
 
       organization := "eu.delving",
 

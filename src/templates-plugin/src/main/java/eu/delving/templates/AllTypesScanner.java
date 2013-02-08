@@ -11,6 +11,8 @@ public class AllTypesScanner extends AbstractScanner {
     @SuppressWarnings({"unchecked"})
     public void scan(final Object cls) {
         String className = getMetadataAdapter().getClassName(cls);
-        getStore().put(className, className);
+        if (className != null && !className.contains("Spec") && !className.contains("Test")) {
+            getStore().put(className, className);
+        }
     }
 }

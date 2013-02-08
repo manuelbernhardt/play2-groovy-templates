@@ -106,7 +106,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getAssignableClasses(clazz: Class[_]) = current.plugin[GroovyTemplatesPlugin].map(_.getAssignableClasses(clazz)).getOrElse(new ArrayList[Class[_]])
 
-  def getAllClasses = current.plugin[GroovyTemplatesPlugin].map(_.getAllClasses).getOrElse(new ArrayList[Class[_]])
+  def getAllClasses = new ArrayList[Class[_]]
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
 
