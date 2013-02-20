@@ -27,8 +27,10 @@ object Plugin extends sbt.Plugin {
           // this is done in Apache FileUtils but we are in a SBT plugin, let's keep deps to a minimum
           val common = baseDir.getAbsolutePath.zip(d.getAbsolutePath).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
           if (!common.isEmpty) {
-            val levels: Int = baseDir.getAbsolutePath.substring(common.length).split(_root_.java.io.File.separator).length
-            val sep = (for(i <- 0 until levels) yield ".." + _root_.java.io.File.separator).mkString
+            // backslash is a special character in regular expressions and must be escaped on windows platforms
+            val fileSeparator = _root_.java.io.File.separator.replaceAll("""\\""", """\\\\""")
+            val levels: Int = baseDir.getAbsolutePath.substring(common.length).split(fileSeparator).length
+            val sep = (for(i <- 0 until levels) yield ".." + fileSeparator).mkString
             Some(sep + d.getAbsolutePath.substring(common.length) + "/app/views/")
           } else {
             None

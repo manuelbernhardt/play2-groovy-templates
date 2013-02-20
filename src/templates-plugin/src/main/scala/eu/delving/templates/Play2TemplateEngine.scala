@@ -142,7 +142,8 @@ object Play2VirtualFile {
   def fromPath(p: String)(implicit app: Application) = {
     if(TemplateEngine.utils.isDevMode) {
       val f = app.getFile(p)
-      Play2VirtualFile(p.split(File.separator).toList.reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
+      // backslash is a special character in regular expressions and must be escaped on windows platforms
+      Play2VirtualFile(p.split(File.separator.replaceAll("""\\""", """\\\\""")).toList.reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
     } else {
       app.resource(p) match {
         case Some(r) =>

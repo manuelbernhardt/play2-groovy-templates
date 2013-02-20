@@ -24,7 +24,7 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
     resolvers ++= Seq(
         "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public",
-        "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots",
+        "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"
     )
     
     addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.5.4")
