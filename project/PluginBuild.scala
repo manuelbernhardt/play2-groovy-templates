@@ -3,11 +3,11 @@ import Keys._
 
 object PluginBuild extends Build {
 
-  val buildVersion = "1.6-SNAPSHOT"
+  val buildVersion = "1.6.0"
 
 
-  val delvingReleases = "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/repositories/releases"
-  val delvingSnapshots = "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"
+  val delvingReleases = "Delving Releases Repository" at "http://nexus.delving.org/nexus/content/repositories/releases"
+  val delvingSnapshots = "Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"
   val delvingRepository = if(buildVersion.endsWith("SNAPSHOT")) delvingSnapshots else delvingReleases
 
   val dependencies = Seq(
@@ -68,6 +68,10 @@ object PluginBuild extends Build {
       organization := "eu.delving",
 
       version := buildVersion,
+
+      scalaVersion := "2.10.0",
+     
+      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
 
       publishTo := Some(delvingRepository),
 
