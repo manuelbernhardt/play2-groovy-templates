@@ -6,7 +6,7 @@ You can read more about Play 1 Groovy Templates in the [official documentation](
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.6.0"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.6.1"`
 - resolvers:
   - `"Delving Releases Repository" at "http://nexus.delving.org/nexus/content/groups/public"`
   - `"Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"`
@@ -29,7 +29,7 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
         "Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"
     )
     
-    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.6.0")
+    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.6.1")
 
 
 (note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
@@ -83,12 +83,16 @@ The following settings (in `application.conf` or whever you application's config
 
 ## Changelog
 
+### 1.6.1 - 21.02.2013
+
+- tinoadams: fix for issue #8 - dropping scala version for sbt pluging to 2.9.2 
+
 ### 1.6.0 - 20.02.2013
 
 - Play 2.1.0
 - Scala 2.10.0
 - Breaking change: fixing a conversion issue with the `params` variable in the view which was causing them to be passed in as Scala Buffer instead of Java ArrayList
-- (@tinoadams) fix for issue #6 - java.util.regex.PatternSyntaxException on Windows
+- tinoadams: fix for issue #6 - java.util.regex.PatternSyntaxException on Windows
 
 ### 1.5.4 - 2.11.2012
 
