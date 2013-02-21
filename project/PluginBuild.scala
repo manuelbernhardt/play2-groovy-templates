@@ -3,7 +3,7 @@ import Keys._
 
 object PluginBuild extends Build {
 
-  val buildVersion = "1.6.0"
+  val buildVersion = "1.6.1"
 
 
   val delvingReleases = "Delving Releases Repository" at "http://nexus.delving.org/nexus/content/repositories/releases"
@@ -29,7 +29,8 @@ object PluginBuild extends Build {
     base = file(".")
   ).settings(
     publish := { },
-    scalaVersion := "2.10.0"
+    scalaVersion := "2.10.0",
+    scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0")
   ).aggregate(templatesSbtPlugin, main)
 
   lazy val main = Project(
