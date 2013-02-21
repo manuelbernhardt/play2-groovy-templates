@@ -69,9 +69,9 @@ object PluginBuild extends Build {
 
       version := buildVersion,
 
-      scalaVersion := "2.10.0",
-     
-      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.10.0"),
+      scalaVersion := "2.9.2",
+
+      scalaBinaryVersion := CrossVersion.binaryScalaVersion("2.9.2"),
 
       publishTo := Some(delvingRepository),
 
