@@ -2,7 +2,7 @@ package eu.delving.templates
 
 import _root_.java.io.File
 import _root_.java.util.ArrayList
-import exceptions.TemplateNotFoundException
+import exceptions.{TemplateCompilationException, TemplateNotFoundException}
 import play.api._
 import play.api.Play.current
 import cache.Cache
@@ -20,12 +20,18 @@ import play.templates._
 
 class Play2TemplateEngine extends TemplateEngine {
 
+  type TemplatesList = Any {
+    def templates: Seq[String]
+
+    def templateRoots: Seq[String]
+  }
+
   lazy val templatesList: TemplatesList = try {
       current.classloader.loadClass("eu.delving.templates.GroovyTemplatesList$").getDeclaredField("MODULE$").get(null).asInstanceOf[TemplatesList]
     } catch {
-      case e =>
+      case t: Throwable =>
         Logger("play").error("Could not find list of templates. Did you add the groovyTemplatesList key to the sourceGenerators in your SBT build?")
-      throw e
+      throw t
     }
 
   override def startup() {
@@ -39,13 +45,13 @@ class Play2TemplateEngine extends TemplateEngine {
 
   def handleException(t: Throwable) {
     t match {
-      case notFound if t.isInstanceOf[TemplateNotFoundException] => PlayException("Template not found", "The template could not be found", Some(t))
-      case compilation if t.isInstanceOf[play.templates.TemplateCompilationError] => {
-        val e = t.asInstanceOf[play.templates.TemplateCompilationError]
+      case notFound if t.isInstanceOf[TemplateNotFoundException] => new PlayException("Template not found", "The template could not be found", t)
+      case compilation if t.isInstanceOf[TemplateCompilationException] => {
+        val e = t.asInstanceOf[TemplateCompilationException]
         if (TemplateEngine.utils.usePrecompiled()) {
-          Logger("play").error("Could not compile template %s at line %s: %s".format(e.source.getName, e.line, e.getMessage))
+          Logger("play").error("Could not compile template %s at line %s: %s".format(e.sourceName, e.line, e.getMessage))
         }
-        throw new eu.delving.templates.exceptions.TemplateCompilationException(e.getMessage, Some(e.line), None, Some(e.source), Some(e.source.getName), None)
+        throw e
       }
       case t@_ => throw t
     }
@@ -107,7 +113,7 @@ case class Play2VirtualFile(name: String, relativePath: String, lastModified: _r
         try {
           _root_.scala.io.Source.fromFile(current.getFile(relativePath)).getLines().mkString("\n")
         } catch {
-          case t =>
+          case t: Throwable =>
             TemplateEngine.utils.logError("Could not read content from file " + relativePath)
             TemplateEngine.engine.handleException(t)
             null
@@ -136,7 +142,8 @@ object Play2VirtualFile {
   def fromPath(p: String)(implicit app: Application) = {
     if(TemplateEngine.utils.isDevMode) {
       val f = app.getFile(p)
-      Play2VirtualFile(p.split(File.separator).toList.reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
+      // backslash is a special character in regular expressions and must be escaped on windows platforms
+      Play2VirtualFile(p.split(File.separator.replaceAll("""\\""", """\\\\""")).toList.reverse.head, p, f.lastModified(), f.exists(), f.isDirectory, Some(f))
     } else {
       app.resource(p) match {
         case Some(r) =>

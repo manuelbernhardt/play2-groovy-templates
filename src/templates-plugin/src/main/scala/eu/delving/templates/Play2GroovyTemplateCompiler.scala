@@ -1,15 +1,23 @@
 package eu.delving.templates
 
 import _root_.java.io.File
+import exceptions.TemplateCompilationException
+import play.templates.GroovyTemplateCompiler
 import play.api.Play.current
-import play.templates.{GroovyTemplateCompiler, TemplateCompilationError}
 
 class Play2GroovyTemplateCompiler extends GroovyTemplateCompiler {
 
   override def action(absolute: Boolean) {
 
     def invalidRouteDefinition(action: String) {
-      throw new TemplateCompilationError(new File(current.path, template.name), "Invalid routes definition: %s".format(action), parser.getLine, template.source.split("\n")(parser.getLine).indexOf(parser.getToken))
+      throw new TemplateCompilationException(
+        "Invalid routes definition: %s".format(action),
+        Some(parser.getLine),
+        Some(template.source.split("\n")(parser.getLine).indexOf(parser.getToken)),
+        Some(new File(play.api.Play.current.path, template.getName)),
+        Some(template.name),
+        None
+      )
     }
 
     val actionPattern = """^(.*)?routes(.*)$""".r

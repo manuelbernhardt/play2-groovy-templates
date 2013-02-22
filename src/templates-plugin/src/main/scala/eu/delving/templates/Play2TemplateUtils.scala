@@ -3,11 +3,11 @@ package eu.delving.templates
 import eu.delving.templates.scala.WrappedMessages
 import play.api._
 import i18n.{Lang, Messages}
-import play.libs._
+import play.libs.Time
 import _root_.java.lang.{Throwable, Integer, String, Class}
 import play.api.Play.current
 import _root_.scala.collection.JavaConversions.asJavaCollection
-import play.cache.Cache
+import play.api.cache.Cache
 import _root_.java.io._
 import _root_.java.util.ArrayList
 import play.templates.{PlayVirtualFile, TemplateUtils, TemplateEngine}
@@ -106,7 +106,7 @@ class Play2TemplateUtils extends TemplateUtils {
 
   def getAssignableClasses(clazz: Class[_]) = current.plugin[GroovyTemplatesPlugin].map(_.getAssignableClasses(clazz)).getOrElse(new ArrayList[Class[_]])
 
-  def getAllClasses = current.plugin[GroovyTemplatesPlugin].map(_.getAllClasses).getOrElse(new ArrayList[Class[_]])
+  def getAllClasses = new ArrayList[Class[_]]
 
   def getAbsoluteApplicationPath = current.path.getAbsolutePath
 

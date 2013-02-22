@@ -4,15 +4,15 @@ Groovy template mechanism for Play! 2, to make the migration between Play 1 and 
 
 More information and documentation about the template engine can be found here:
 
-- http://www.playframework.org/documentation/1.2.5/templates
-- http://www.playframework.org/documentation/1.2.5/tags
+- [Groovy Templates engine documentation](http://www.playframework.org/documentation/1.2.5/templates)
+- [Groovy Tags documentation](http://www.playframework.org/documentation/1.2.5/tags)
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.5.4"`
+- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.6.1"`
 - resolvers:
-  - `"Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public"`
-  - `"Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots"`
+  - `"Delving Releases Repository" at "http://nexus.delving.org/nexus/content/groups/public"`
+  - `"Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"`
 
 
 In order for pre-compilation to work correctly in PROD mode, you need to hook the groovy templates plugin in the `sourceGenerators` of your build, for example:
@@ -28,14 +28,26 @@ In order for pre-compilation to work correctly in PROD mode, you need to hook th
 And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
     resolvers ++= Seq(
-        "Delving Releases Repository" at "http://development.delving.org:8081/nexus/content/groups/public",
-        "Delving Snapshot Repository" at "http://development.delving.org:8081/nexus/content/repositories/snapshots",
+        "Delving Releases Repository" at "http://nexus.delving.org/nexus/content/groups/public",
+        "Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"
     )
     
-    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.5.4")
+    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.6.1")
 
 
 (note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
+
+### Disabling the reloading of the application when a template file is modified
+
+You can do this by excluding the HTML template files from the `watchTransitiveSources` task of your project, e.g. by adding this definition into your main Project definition:
+
+    watchTransitiveSources <<= watchTransitiveSources map { (sources: Seq[java.io.File]) =>
+      sources
+        .filterNot(source => source.isFile && source.getPath.contains("app/views") && !source.getName.endsWith(".scala.html") && source.getName.endsWith(".html"))
+        .filterNot(source => source.isDirectory && source.getPath.contains("app/views"))
+    }
+
+(this is planned to be done automatically by the SBT plugin in a future release)
 
 ## Scala
 
@@ -85,6 +97,17 @@ The following settings (in `application.conf` or whever you application's config
 - `play.groovyTemplates.htmlCompression`: activates HTML compression of rendered templates (default: `true`)
 
 ## Changelog
+
+### 1.6.1 - 21.02.2013
+
+- tinoadams: fix for issue #8 - dropping scala version for sbt pluging to 2.9.2 
+
+### 1.6.0 - 20.02.2013
+
+- Play 2.1.0
+- Scala 2.10.0
+- Breaking change: fixing a conversion issue with the `params` variable in the view which was causing them to be passed in as Scala Buffer instead of Java ArrayList
+- tinoadams: fix for issue #6 - java.util.regex.PatternSyntaxException on Windows
 
 ### 1.5.4 - 2.11.2012
 
