@@ -34,6 +34,18 @@ And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
 (note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
 
+### Disabling the reloading of the application when a template file is modified
+
+You can do this by excluding the HTML template files from the `watchTransitiveSources` task of your project, e.g. by adding this definition into your main Project definition:
+
+    watchTransitiveSources <<= watchTransitiveSources map { (sources: Seq[java.io.File]) =>
+      sources
+        .filterNot(source => source.isFile && source.getPath.contains("app/views") && !source.getName.endsWith(".scala.html") && source.getName.endsWith(".html"))
+        .filterNot(source => source.isDirectory && source.getPath.contains("app/views"))
+    }
+
+(this is planned to be done automatically by the SBT plugin in a future release)
+
 ## Scala
 
 In order to use the Groovy templates with Scala, mix in the `eu.delving.templates.scala.GroovyTemplates` trait. Then you can call templates like this:
