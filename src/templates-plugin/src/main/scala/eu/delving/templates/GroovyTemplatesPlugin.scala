@@ -1,7 +1,7 @@
 package eu.delving.templates
 
 import _root_.java.util.ArrayList
-import _root_.java.util.concurrent.ConcurrentHashMap
+import _root_.java.util.concurrent.{Executors, ConcurrentHashMap}
 import play.api._
 import play.api.Play.current
 import org.reflections._
@@ -33,6 +33,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
   var allClassesCache = new ArrayList[Class[_]]
 
   override def onStart {
+    val now = System.currentTimeMillis()
     engine = new Play2TemplateEngine
     engine.startup()
 
@@ -42,7 +43,9 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
     allClassesMetadata = new Reflections(new util.ConfigurationBuilder()
       .addUrls(util.ClasspathHelper.forPackage("play.templates", TemplateEngine.utils.getClassLoader))
       .addUrls(util.ClasspathHelper.forPackage("views", TemplateEngine.utils.getClassLoader))
-      .setScanners(new AllTypesScanner, new scanners.SubTypesScanner))
+      .setScanners(new AllTypesScanner, new scanners.SubTypesScanner)
+      .setExecutorService(Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors()))
+    )
 
     Logger("play").debug("Found %s classes".format(allClassesMetadata.getStore.getKeysCount))
 
@@ -72,7 +75,7 @@ class GroovyTemplatesPlugin(app: Application) extends Plugin {
 
     CustomGroovy()
 
-    Logger("play").info("Groovy template engine started")
+    Logger("play").info(s"Groovy template engine started in ${System.currentTimeMillis() - now} ms")
   }
 
   override def onStop {
