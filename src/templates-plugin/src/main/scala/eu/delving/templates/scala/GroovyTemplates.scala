@@ -88,7 +88,10 @@ trait GroovyTemplates {
   private def setContext(currentMethodLookup: Boolean = true)(implicit request: RequestHeader) {
 
     if (currentMethodLookup) {
-      val methodCandidates = Thread.currentThread().getStackTrace.filter(_.getClassName.startsWith(this.getClass.getName + "$anonfun$"))
+      val methodCandidates = Thread.currentThread().getStackTrace.filter { trace =>
+        trace.getClassName.startsWith(this.getClass.getName + "$anonfun$") ||
+        trace.getClassName.startsWith(this.getClass.getName + "$$anonfun$")
+      }
       val trace = methodCandidates.headOption.getOrElse(throw new TemplateEngineException(ExceptionType.UNEXPECTED, "Could not find current method in execution call", null))
       val name: Option[String] = methodNameExtractor.findFirstMatchIn(trace.getClassName.substring(this.getClass.getName.length())).map(_.group(1))
       if (name.isDefined)
