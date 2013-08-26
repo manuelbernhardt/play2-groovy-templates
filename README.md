@@ -98,6 +98,11 @@ The following settings (in `application.conf` or whever you application's config
 
 ## Changelog
 
+### 1.6.2 - 26.08.2013
+
+- Implicit name resolution works as well with injected controllers
+- Faster reflections discovery
+
 ### 1.6.1 - 21.02.2013
 
 - tinoadams: fix for issue #8 - dropping scala version for sbt pluging to 2.9.2 
