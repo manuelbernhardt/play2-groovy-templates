@@ -67,7 +67,7 @@ class Play2TemplateEngine extends TemplateEngine {
     path
   }
 
-  def loadPrecompiledTemplate(name: String) = _root_.scala.io.Source.fromFile(precompiledTemplatesLocation + name).map(_.toByte).toArray
+  def loadPrecompiledTemplate(name: String) = _root_.scala.io.Source.fromFile(precompiledTemplatesLocation + name, "UTF-8").map(_.toByte).toArray
 
   def getPrecompiledTemplate(name: String) = new File(precompiledTemplatesLocation + name)
 
@@ -111,7 +111,7 @@ case class Play2VirtualFile(name: String, relativePath: String, lastModified: _r
     if (TemplateEngine.utils.isDevMode) {
       if (realFile.isDefined) {
         try {
-          _root_.scala.io.Source.fromFile(current.getFile(relativePath)).getLines().mkString("\n")
+          _root_.scala.io.Source.fromFile(current.getFile(relativePath), "UTF-8").getLines().mkString("\n")
         } catch {
           case t: Throwable =>
             TemplateEngine.utils.logError("Could not read content from file " + relativePath)
