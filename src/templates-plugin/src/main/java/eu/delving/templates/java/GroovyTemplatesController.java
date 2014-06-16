@@ -1,11 +1,18 @@
 package eu.delving.templates.java;
 
+import eu.delving.templates.GroovyTemplatesPlugin;
+import eu.delving.templates.exceptions.TemplateNotFoundException;
+import play.Play;
+import play.api.libs.MimeTypes;
+import play.i18n.Messages;
+import play.libs.Scala;
+import play.mvc.Controller;
+import play.templates.PlayVirtualFile;
+import play.templates.TemplateEngine;
+import scala.util.Either;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import scala.util.Either;
-import src.main.scala.eu.delving.templates.GroovyTemplatesPlugin;
-import src.main.scala.eu.delving.templates.exceptions.TemplateNotFoundException;
 
 /**
  * Controller to render Groovy Templates
@@ -186,11 +193,6 @@ public class GroovyTemplatesController extends Controller {
             args.put(k8, v8);
             args.put(k9, v9);
             args.put(k10, v10);
-            return this;
-        }
-
-        public GroovyTemplateContentBuilder params(HashMap<String, Object> map) {
-        	args.putAll(map);
             return this;
         }
 
