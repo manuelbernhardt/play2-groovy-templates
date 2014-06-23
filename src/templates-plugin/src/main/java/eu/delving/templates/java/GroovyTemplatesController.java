@@ -196,6 +196,10 @@ public class GroovyTemplatesController extends Controller {
             return this;
         }
 
+        public GroovyTemplateContentBuilder params(Map<String, Object> map) {
+            args.putAll(map);
+            return this;
+        }
 
     }
 
