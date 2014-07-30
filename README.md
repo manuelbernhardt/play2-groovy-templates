@@ -9,11 +9,9 @@ More information and documentation about the template engine can be found here:
 
 In order to use the plugin, make sure you have these dependencies / resolvers in your SBT build:
 
-- dependencies: `"eu.delving" %% "groovy-templates-plugin" % "1.6.1"`
+- dependencies: `"io.bernhardt" %% "groovy-templates-plugin" % "1.6.4-SNAPSHOT"`
 - resolvers:
-  - `"Delving Releases Repository" at "http://nexus.delving.org/nexus/content/groups/public"`
-  - `"Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"`
-
+  - `"Sonatype OSS Repository" at "https://oss.sonatype.org/content/groups/public"`
 
 In order for pre-compilation to work correctly in PROD mode, you need to hook the groovy templates plugin in the `sourceGenerators` of your build, for example:
 
@@ -28,11 +26,10 @@ In order for pre-compilation to work correctly in PROD mode, you need to hook th
 And your `project/plugins.sbt` needs to contain the Groovy Templates SBT plugin:
 
     resolvers ++= Seq(
-        "Delving Releases Repository" at "http://nexus.delving.org/nexus/content/groups/public",
-        "Delving Snapshot Repository" at "http://nexus.delving.org/nexus/content/repositories/snapshots"
+       "Sonatype OSS Repository" at "https://oss.sonatype.org/content/groups/public"
     )
     
-    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.6.1")
+    addSbtPlugin("eu.delving" %% "groovy-templates-sbt-plugin" % "1.6.4-SNAPSHOT")
 
 
 (note: this will scan for templates at compilation time and generate a list which is included in the build and used in PROD mode to pre-compile the templates. We need this because Groovy Templates aren't compiled source-files)
