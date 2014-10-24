@@ -1,3 +1,11 @@
+# This code is not anymore actively maintained
+
+I don't have time anymore to maintain this project. If you still use it, and want or need it for your projects, I will be happy to point to your updated fork.
+
+If you don't absolutely need the groovy templates though I would recommend to use the [Twirl templates](https://github.com/playframework/twirl) which are type-safe and compiled. This project was just intended as a bridge between Play 1 and Play 2 to simplify the migration.
+
+----
+
 # Groovy templates for Play! 2
 
 Groovy template mechanism for Play! 2, to make the migration between Play 1 and Play 2 easier. The template engine is based on the one of Play 1.
